@@ -9,16 +9,46 @@ dependencies = [
     "testcontainers>=4.9.1",
 ]
 
+[project.entry-points.pytest11]
+asyncpg_recorder = "asyncpg_recorder.plugin"
+
+
+[build-system]
+requires = ["uv_build>=0.7.5"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
     "pytest-asyncio>=0.25.3",
     "pytest-sugar>=1.1.1",
+    "ruff>=0.12.10",
     "testcontainers[postgres]>=4.9.1",
 ]
 
-[tool.uv]
-python-preference = "system"
-
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle Error
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-nameing
+    "Q",    # flake8-quotes
+    "W",    # pycodestyle Warning
+    "C90",  # mccabe
+    "TRY",  # tryceratops
+    "RUF",  # ruff-specific rules
+    "FURB", # refurb
+    "PERF", # perflint
+    "S",    # bandit
+    "B",    # bugbear
+    "SIM",  # simplify
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*" = ["S101"]  # S101 usage of asserts;
