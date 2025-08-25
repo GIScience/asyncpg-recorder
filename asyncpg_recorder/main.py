@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import pickle
 import zlib
@@ -52,6 +53,8 @@ def use_cassette(func: Callable):  # noqa: C901
                         cassette = pickle.load(file)  # noqa: S301
                 return cassette[hash]["results"]
 
+            logging.info("Try to replay from cassette.")
+
             asyncpg.connect = connect_wrapper
             asyncpg.connection.Connection._execute = execute_wrapper
 
@@ -102,6 +105,8 @@ def use_cassette(func: Callable):  # noqa: C901
                         pickle.dump(cassette, file)
                 return result
 
+            logging.info("Record to cassette.")
+
             asyncpg.connect = connect_original  # reset
             asyncpg.connection.Connection._execute = execute_wrapper
             return await func(*args, **kwargs)
@@ -121,7 +126,6 @@ def args_to_kwargs(func, args):
 
 def name() -> Path:
     # TODO: support base dir (then rewrite tests to use tmp_dir)
-    # TODO: support postfix (write test with multiple calls to verify)
     # TODO: Try out with xdist
     node_id = os.environ["PYTEST_CURRENT_TEST"]
     if "[" in node_id and "]" in node_id:
