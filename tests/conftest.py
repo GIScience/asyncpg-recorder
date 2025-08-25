@@ -1,9 +1,7 @@
-from os import PathLike
-from asyncpg import Path
+from asyncpg_recorder.main import name
 from tests import main
 
 import pytest
-from uuid import uuid4
 from testcontainers.postgres import PostgresContainer
 
 
@@ -25,24 +23,10 @@ def postgres(monkeypatch):
 
 
 @pytest.fixture
-def tmp_cassette_json(tmp_path):
-    tmp_dir = tmp_path / str(uuid4())
-    tmp_dir.mkdir()
-    cassette = tmp_dir / "cassette.json"
-    yield cassette
+def path():
+    p = name()
+    yield p
     try:
-        cassette.unlink()
-    except Exception:
-        pass
-
-
-@pytest.fixture
-def tmp_cassette_pickle(tmp_path):
-    tmp_dir = tmp_path / str(uuid4())
-    tmp_dir.mkdir()
-    cassette = tmp_dir / "cassette.pickle"
-    yield cassette
-    try:
-        cassette.unlink()
-    except Exception:
-        pass
+        p.with_suffix(".json").unlink()
+    except FileNotFoundError:
+        p.with_suffix(".pickle").unlink()

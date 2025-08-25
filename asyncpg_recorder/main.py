@@ -1,6 +1,8 @@
 from inspect import signature
+import os
 import pickle
 from typing import Callable
+from json import JSONDecodeError
 import zlib
 import json
 import asyncpg
@@ -9,37 +11,22 @@ from pathlib import Path
 from testcontainers.postgres import PostgresContainer
 
 
-def use_cassette(path: str | Path):
-    """Depending on Existenz of the cassette either record or replay response."""
-    if isinstance(path, str):
-        path = Path(path)
+def use_cassette(func: Callable):
+    """Replay or record database response."""
 
-    if path.suffix not in [".json", ".pickle"]:
-        raise ValueError("Only .json and .pickle files are supported as cassettes.")
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        connect_original = asyncpg.connect
+        execute_original = asyncpg.connection.Connection._execute
 
-    if path.exists():
-        # If cassette exists try to replay, ...
         try:
-            return _replay(path)
-        except KeyError:
-            # For given arguments no record exists. Continue with recording.
-            pass
-    # ... else record.
-    return _record(path)
-
-
-def _replay(path: Path) -> Callable:
-    def _(func: Callable) -> Callable:
-        """Connect to a temporary Postgres database and return recorded response."""
-
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            connect_original = asyncpg.connect
-            execute_original = asyncpg.connection.Connection._execute
-
+            # Replay
+            # ------
+            # Connect to a temporary Postgres database and return recorded response.
             @wraps(connect_original)
             async def connect_wrapper(*args, **kwargs):
                 # TODO: add name to container
+                # TODO: start only one container per test session
                 with PostgresContainer("postgres") as postgres:
                     dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
                         user=postgres.username,
@@ -51,31 +38,29 @@ def _replay(path: Path) -> Callable:
 
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
-                # TODO: generate hash from args/kwargs
+                path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash = str(zlib.crc32(pickle.dumps(args)))
-                cassette = _read_cassette(path)
+                try:
+                    with open(path.with_suffix(".json"), "r") as file:
+                        cassette = json.load(file)
+                except (FileNotFoundError, JSONDecodeError):
+                    with open(path.with_suffix(".pickle"), "rb") as file:
+                        cassette = pickle.load(file)
                 return cassette[hash]["results"]
 
             asyncpg.connect = connect_wrapper
             asyncpg.connection.Connection._execute = execute_wrapper
+
             return await func(*args, **kwargs)
 
-        return wrapper
-
-    return _
-
-
-def _record(path: Path) -> Callable:
-    def _(func: Callable) -> Callable:
-        """Record input arguments and database response."""
-
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            execute_original = asyncpg.connection.Connection._execute
-
+        except (KeyError, FileNotFoundError):
+            # Record
+            # -----
+            # Record input arguments and database response.
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
+                path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash = str(zlib.crc32(pickle.dumps(args)))
                 result = await execute_original(
@@ -84,8 +69,13 @@ def _record(path: Path) -> Callable:
                     **execute_kwargs,
                 )
                 try:
-                    cassette = _read_cassette(path)
-                except (FileNotFoundError, json.JSONDecodeError):
+                    try:
+                        with open(path.with_suffix(".json"), "r") as file:
+                            cassette = json.load(file)
+                    except (FileNotFoundError, JSONDecodeError):
+                        with open(path.with_suffix(".pickle"), "rb") as file:
+                            cassette = pickle.load(file)
+                except FileNotFoundError:
                     cassette = {}
                 cassette = {
                     hash: {
@@ -93,23 +83,30 @@ def _record(path: Path) -> Callable:
                         # TODO:
                         # "results": pickle.dumps(result),
                         # https://github.com/MagicStack/asyncpg/pull/1000
-                        **_args_to_kwargs(execute_original, execute_args),
+                        **args_to_kwargs(execute_original, execute_args),
                         **kwargs,
                     },
                     **cassette,
                 }
-                _write_cassette(path, cassette)
+                try:
+                    with open(path.with_suffix(".json"), "w") as file:
+                        json.dump(cassette, file)
+                except TypeError:
+                    # remove partly written JSON file
+                    if path.with_suffix(".json").exists():
+                        path.with_suffix(".json").unlink()
+                    with open(path.with_suffix(".pickle"), "wb") as file:
+                        pickle.dump(cassette, file)
                 return result
 
+            asyncpg.connect = connect_original  # reset
             asyncpg.connection.Connection._execute = execute_wrapper
             return await func(*args, **kwargs)
 
-        return wrapper
-
-    return _
+    return wrapper
 
 
-def _args_to_kwargs(func, args):
+def args_to_kwargs(func, args):
     return dict(
         zip(
             list(signature(func).parameters.keys())[1:],
@@ -118,25 +115,23 @@ def _args_to_kwargs(func, args):
     )
 
 
-def _write_cassette(path: Path, cassette: dict):
-    match path.suffix:
-        case ".json":
-            with open(path, "w") as file:
-                json.dump(cassette, file)
-        case ".pickle":
-            with open(path, "wb") as file:
-                pickle.dump(cassette, file)
-        case _:
-            raise ValueError("Only .json and .pickle files are supported as cassettes.")
-
-
-def _read_cassette(path: Path) -> dict:
-    match path.suffix:
-        case ".json":
-            with open(path, "r") as file:
-                return json.load(file)
-        case ".pickle":
-            with open(path, "rb") as file:
-                return pickle.load(file)
-        case _:
-            raise ValueError("Only .json and .pickle files are supported as cassettes.")
+def name() -> Path:
+    # TODO: support base dir (then rewrite tests to use tmp_dir)
+    # TODO: support postfix (write test with multiple calls to verify)
+    # TODO: Try out with xdist
+    node_id = os.environ["PYTEST_CURRENT_TEST"]
+    if "[" in node_id and "]" in node_id:
+        start = node_id.index("[") + 1
+        end = node_id.index("]")
+        params = f"[{node_id[start:end]}]"
+    else:
+        params = ""
+    file_path = Path(
+        node_id.replace(" (call)", "")
+        .replace(" (setup)", "")
+        .replace(" (teardown)", "")
+        .replace("::", "--")
+        .replace(f"{params}", "")
+        + ".cassette.raw"  # .raw will be replaced by Path.with_suffix during file access
+    )
+    return file_path.resolve()

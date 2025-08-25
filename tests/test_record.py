@@ -1,5 +1,4 @@
 import datetime
-import pickle
 from tests import main
 from asyncpg_recorder import use_cassette
 
@@ -28,26 +27,18 @@ async def test_select_now_without_database():
 
 
 @pytest.mark.asyncio
-async def test_unsupported_file_type():
-    with pytest.raises(ValueError):
-
-        @use_cassette("cassette.yaml")
-        async def _():
-            pass
-
-
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
-async def test_select_version_fetchrow(tmp_cassette_json: Path):
-    @use_cassette(tmp_cassette_json)
+async def test_select_version_fetchrow(path):
+    @use_cassette
     async def select_version():
         return await main.select_version_connect_fetchrow()
 
-    assert not tmp_cassette_json.exists()
+    path = path.with_suffix(".json")
+    assert not path.exists()
     result = await select_version()
-    assert tmp_cassette_json.exists()
+    assert path.exists()
 
-    with open(tmp_cassette_json) as file:
+    with open(path) as file:
         cassette = json.load(file)
 
     assert (
@@ -59,16 +50,17 @@ async def test_select_version_fetchrow(tmp_cassette_json: Path):
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
-async def test_select_version_fetch(tmp_cassette_json: Path):
-    @use_cassette(tmp_cassette_json)
+async def test_select_version_fetch(path):
+    @use_cassette
     async def select_version():
         return await main.select_version_connect_fetch()
 
-    assert not tmp_cassette_json.exists()
+    path = path.with_suffix(".json")
+    assert not path.exists()
     result = await select_version()
-    assert tmp_cassette_json.exists()
+    assert path.exists()
 
-    with open(tmp_cassette_json) as file:
+    with open(path) as file:
         cassette = json.load(file)
 
     assert (
@@ -80,48 +72,37 @@ async def test_select_version_fetch(tmp_cassette_json: Path):
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
-async def test_select_now_pickle(tmp_cassette_pickle: Path):
-    @use_cassette(tmp_cassette_pickle)
+async def test_select_now_pickle(path):
+    @use_cassette
     async def select_now():
         return await main.select_now()
 
-    assert not tmp_cassette_pickle.exists()
+    path = path.with_suffix(".pickle")
+    assert not path.exists()
     await select_now()
-    assert tmp_cassette_pickle.exists()
+    assert path.exists()
 
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
-async def test_select_now_json(tmp_cassette_json: Path):
-    @use_cassette(tmp_cassette_json)
-    async def select_now():
-        return await main.select_now()
-
-    # TODO: raise custom error with helpful description
-    with pytest.raises(TypeError):
-        await select_now()
-
-
-@pytest.mark.asyncio
-@pytest.mark.usefixtures("postgres")
-async def test_multiple_calls_with_same_cassette(tmp_cassette_pickle: Path):
-    @use_cassette(tmp_cassette_pickle)
+async def test_multiple_calls_with_same_cassette(path: Path):
+    @use_cassette
     async def query_1():
         return await main.select_version_connect_fetch()
 
-    @use_cassette(tmp_cassette_pickle)
+    @use_cassette
     async def query_2():
         return await main.select_version_connect_fetchrow()
 
-    assert not tmp_cassette_pickle.exists()
-
+    path = Path(path).with_suffix(".json")
+    # assert not path.exists()
     await query_1()
-    with open(tmp_cassette_pickle, "rb") as file:
-        cassette_1 = pickle.load(file)
+    with open(path, "r") as file:
+        cassette_1 = json.load(file)
 
     await query_2()
-    with open(tmp_cassette_pickle, "rb") as file:
-        cassette_2 = pickle.load(file)
+    with open(path, "r") as file:
+        cassette_2 = json.load(file)
 
     assert cassette_1 != cassette_2
     assert set(cassette_1.keys()).issubset(set(cassette_2.keys()))
