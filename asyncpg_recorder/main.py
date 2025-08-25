@@ -1,17 +1,22 @@
-from inspect import signature
+import json
 import os
 import pickle
-from typing import Callable
-from json import JSONDecodeError
 import zlib
-import json
-import asyncpg
 from functools import wraps
+from inspect import signature
+from json import JSONDecodeError
 from pathlib import Path
+from typing import Callable
+
+import asyncpg
 from testcontainers.postgres import PostgresContainer
 
+# will be instantiated on pytest session start (see plugin.py)
+POSTGRES: PostgresContainer | None = None
 
-def use_cassette(func: Callable):
+
+# TODO: Fix C901
+def use_cassette(func: Callable):  # noqa: C901
     """Replay or record database response."""
 
     @wraps(func)
@@ -25,16 +30,14 @@ def use_cassette(func: Callable):
             # Connect to a temporary Postgres database and return recorded response.
             @wraps(connect_original)
             async def connect_wrapper(*args, **kwargs):
-                # TODO: add name to container
-                # TODO: start only one container per test session
-                with PostgresContainer("postgres") as postgres:
-                    dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
-                        user=postgres.username,
-                        password=postgres.password,
-                        port=postgres.get_exposed_port(5432),
-                        database=postgres.dbname,
-                    )
-                    return await connect_original(dsn=dsn)
+                assert POSTGRES is not None  # noqa: S101
+                dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
+                    user=POSTGRES.username,
+                    password=POSTGRES.password,
+                    port=POSTGRES.get_exposed_port(5432),
+                    database=POSTGRES.dbname,
+                )
+                return await connect_original(dsn=dsn)
 
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
@@ -46,7 +49,7 @@ def use_cassette(func: Callable):
                         cassette = json.load(file)
                 except (FileNotFoundError, JSONDecodeError):
                     with open(path.with_suffix(".pickle"), "rb") as file:
-                        cassette = pickle.load(file)
+                        cassette = pickle.load(file)  # noqa: S301
                 return cassette[hash]["results"]
 
             asyncpg.connect = connect_wrapper
@@ -74,7 +77,7 @@ def use_cassette(func: Callable):
                             cassette = json.load(file)
                     except (FileNotFoundError, JSONDecodeError):
                         with open(path.with_suffix(".pickle"), "rb") as file:
-                            cassette = pickle.load(file)
+                            cassette = pickle.load(file)  # noqa: S301
                 except FileNotFoundError:
                     cassette = {}
                 cassette = {
@@ -111,6 +114,7 @@ def args_to_kwargs(func, args):
         zip(
             list(signature(func).parameters.keys())[1:],
             args,
+            strict=False,
         )
     )
 
@@ -132,6 +136,6 @@ def name() -> Path:
         .replace(" (teardown)", "")
         .replace("::", "--")
         .replace(f"{params}", "")
-        + ".cassette.raw"  # .raw will be replaced by Path.with_suffix during file access
+        + ".cassette.raw"  # .raw will be replaced by .with_suffix during file access
     )
     return file_path.resolve()

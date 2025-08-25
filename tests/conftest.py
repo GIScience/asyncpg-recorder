@@ -1,8 +1,10 @@
+import pytest
+from testcontainers.postgres import PostgresContainer
+
 from asyncpg_recorder.main import name
 from tests import main
 
-import pytest
-from testcontainers.postgres import PostgresContainer
+pytest_plugins = ["pytester"]
 
 
 @pytest.fixture()

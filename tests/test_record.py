@@ -1,11 +1,12 @@
 import datetime
-from tests import main
-from asyncpg_recorder import use_cassette
-
-from asyncpg import Record
-import pytest
 import json
 from pathlib import Path
+
+import pytest
+from asyncpg import Record
+
+from asyncpg_recorder import use_cassette
+from tests import main
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 

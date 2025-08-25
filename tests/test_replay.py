@@ -4,11 +4,12 @@ Cassettes have been recorded by adding the `postgres` fixture to the tests for o
 """
 
 import datetime
-from tests import main
-from asyncpg_recorder import use_cassette
+from pathlib import Path
 
 import pytest
-from pathlib import Path
+
+from asyncpg_recorder import use_cassette
+from tests import main
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
@@ -19,7 +20,7 @@ async def test_select_now():
     results = await main.select_now()
     assert isinstance(results[0]["now"], datetime.datetime)
     assert results[0]["now"] == datetime.datetime(
-        2025, 8, 25, 10, 2, 4, 438553, tzinfo=datetime.timezone.utc
+        2025, 8, 25, 11, 46, 5, 247390, tzinfo=datetime.timezone.utc
     )
     # assert isinstance(result[0], Record)
 
