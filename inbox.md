@@ -8,8 +8,8 @@
 
 ## Improvements
 
-- [ ] Spin up one testcontainer instance per session to avoid spinning up a new testcontainer for each usage of `use_cassette`
-- [ ] Use pytest node id to generate cassette names
+- [x] Spin up one testcontainer instance per session to avoid spinning up a new testcontainer for each usage of `use_cassette`
+- [x] Use pytest node id to generate cassette names
 
 
 ## Build
