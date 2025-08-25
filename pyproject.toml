@@ -13,6 +13,7 @@ dependencies = [
 dev = [
     "pytest>=8.3.4",
     "pytest-asyncio>=0.25.3",
+    "pytest-sugar>=1.1.1",
     "testcontainers[postgres]>=4.9.1",
 ]
 
