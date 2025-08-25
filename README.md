@@ -1,9 +1,5 @@
 # Asyncpg Recorder
 
-## Inbox
-
-See [inbox.md](/inbox.md)
-
 ## Installation
 
 ```bash
@@ -24,7 +20,7 @@ async def query():
     return res
 
 
-@use_cassette("cassette.pickle")
+@use_cassette
 def test_select_now_replay():
     query()
 ```
@@ -36,3 +32,8 @@ def test_select_now_replay():
 ```bash
 uv run pytest
 ```
+
+## Inbox
+
+See [inbox.md](/inbox.md)
+
