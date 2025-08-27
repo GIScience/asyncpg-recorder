@@ -1,18 +1,21 @@
 import datetime
 import json
 from pathlib import Path
-import vcr
 
 import pytest
+import pytest_asyncio
+import vcr
 from asyncpg import Record
 
 from asyncpg_recorder import use_cassette
 from tests import main
 
+# Marks all test coroutines in this module
+pytestmark = pytest.mark.asyncio
+
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_select_now_with_database():
     """No `use_cassette` decorator. Database is reachable."""
@@ -21,14 +24,12 @@ async def test_select_now_with_database():
     assert isinstance(result[0], Record)
 
 
-@pytest.mark.asyncio
 async def test_select_now_without_database():
     """No `use_cassette` decorator. Database is not reachable."""
     with pytest.raises(ValueError):
         await main.select_now()
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_select_version_fetchrow(path):
     @use_cassette
@@ -50,7 +51,6 @@ async def test_select_version_fetchrow(path):
     # assert isinstance(cassette["result"], Record)
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_select_version_fetch(path):
     @use_cassette
@@ -72,7 +72,6 @@ async def test_select_version_fetch(path):
     # assert isinstance(cassette["result"][0], Record)
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_select_now_pickle(path):
     @use_cassette
@@ -85,7 +84,6 @@ async def test_select_now_pickle(path):
     assert path.exists()
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_multiple_calls_with_same_cassette(path: Path):
     @use_cassette
@@ -110,7 +108,6 @@ async def test_multiple_calls_with_same_cassette(path: Path):
     assert set(cassette_1.keys()).issubset(set(cassette_2.keys()))
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("param", ["foo", "bar"])
 @pytest.mark.usefixtures("postgres")
 async def test_parametrized_with_same_cassette(param: str, path: Path):
@@ -130,10 +127,9 @@ async def test_parametrized_with_same_cassette(param: str, path: Path):
         assert len(cassette.keys()) == 2
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres")
 async def test_select_version_fetch_with_vcr_cassette(path):
-    # Using vcr_py cassette along side asyncpg_recorder cassette resulted in
+    # Using vcr.py cassette along side asyncpg_recorder cassette resulted in
     # indefinitely waiting for testcontainer to be ready. Solved by keeping container
     # state in plugin.py.
     @vcr.use_cassette
@@ -145,3 +141,77 @@ async def test_select_version_fetch_with_vcr_cassette(path):
     assert not path.exists()
     await select_version()
     assert path.exists()
+
+
+@pytest_asyncio.fixture(params=[False, True])
+async def param(request):
+    return request.param
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("postgres", "param")
+@use_cassette
+async def test_parametrized_fixtures(path):
+    async def select_version():
+        return await main.select_version_connect_fetch()
+
+    path = path.with_suffix(".pickle")
+    assert not path.exists()
+    await select_version()
+    assert path.exists()
+
+
+@pytest.mark.asyncio(loop_scope="class")
+class TestParametrizedFixtureUseCassetteOnTest:
+    @pytest_asyncio.fixture(params=[False, True], loop_scope="class")
+    async def param(self, request):
+        return request.param
+
+    @pytest.mark.usefixtures("postgres", "param")
+    @use_cassette
+    async def test(self, path):
+        async def select_version():
+            return await main.select_version_connect_fetch()
+
+        path = path.with_suffix(".pickle")
+        assert not path.exists()
+        await select_version()
+        assert path.exists()
+
+
+@pytest.mark.skip("Not supported.")
+@pytest.mark.asyncio(loop_scope="class")
+class TestParametrizedFixtureUseCassetteOnFixture:
+    @pytest_asyncio.fixture(params=[False, True], loop_scope="class")
+    @use_cassette
+    async def param(self, request):
+        return request.param
+
+    @pytest.mark.usefixtures("postgres", "param")
+    async def test(self, path):
+        async def select_version():
+            return await main.select_version_connect_fetch()
+
+        path = path.with_suffix(".pickle")
+        assert not path.exists()
+        await select_version()
+        assert path.exists()
+
+
+@pytest.mark.skip("Not supported.")
+@pytest.mark.asyncio
+class TestParametrizedFixtureUseCassetteOnTestLoopScopeDefault:
+    @pytest_asyncio.fixture(params=[False, True])
+    async def param(self, request):
+        return request.param
+
+    @pytest.mark.usefixtures("postgres", "param")
+    @use_cassette
+    async def test(self, path):
+        async def select_version():
+            return await main.select_version_connect_fetch()
+
+        path = path.with_suffix(".pickle")
+        assert not path.exists()
+        await select_version()
+        assert path.exists()

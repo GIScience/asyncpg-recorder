@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Callable
 
 import asyncpg
-from testcontainers.postgres import PostgresContainer
 
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
@@ -103,6 +102,13 @@ def use_cassette(func: Callable):  # noqa: C901
             asyncpg.connect = connect_original  # reset
             asyncpg.connection.Connection._execute = execute_wrapper
             return await func(*args, **kwargs)
+
+        finally:
+            # Reset
+            # -----
+            # Reset mocked asyncpg function to original.
+            asyncpg.connect = connect_original
+            asyncpg.connection.Connection._execute = execute_original
 
     return wrapper
 

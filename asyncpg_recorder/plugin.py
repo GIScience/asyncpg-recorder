@@ -4,7 +4,6 @@ from testcontainers.postgres import PostgresContainer
 
 from asyncpg_recorder import main
 
-
 POSTGRES: PostgresContainer
 
 
