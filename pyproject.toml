@@ -1,9 +1,10 @@
 [project]
 name = "asyncpg-recorder"
 version = "0.1.0"
-description = "Add your description here"
-authors = [{email="ohsome@heigit.org"}]
+description = "Automatically mock your Postgres interactions to simplify and speed up testing"
 readme = "README.md"
+license = "LGPL-3.0-only"
+authors = [{email="ohsome@heigit.org"}]
 requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.30.0",
