@@ -1,6 +1,7 @@
 import datetime
 import json
 from pathlib import Path
+import vcr
 
 import pytest
 from asyncpg import Record
@@ -107,3 +108,40 @@ async def test_multiple_calls_with_same_cassette(path: Path):
 
     assert cassette_1 != cassette_2
     assert set(cassette_1.keys()).issubset(set(cassette_2.keys()))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("param", ["foo", "bar"])
+@pytest.mark.usefixtures("postgres")
+async def test_parametrized_with_same_cassette(param: str, path: Path):
+    @use_cassette
+    async def query(param: str):
+        return await main.select_version_connect_fetch()
+
+    await query(param)
+    path = Path(path).with_suffix(".json")
+    if param == "foo":
+        with open(path, "r") as file:
+            cassette = json.load(file)
+        assert len(cassette.keys()) == 1
+    if query == "bar":
+        with open(path, "r") as file:
+            cassette = json.load(file)
+        assert len(cassette.keys()) == 2
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures("postgres")
+async def test_select_version_fetch_with_vcr_cassette(path):
+    # Using vcr_py cassette along side asyncpg_recorder cassette resulted in
+    # indefinitely waiting for testcontainer to be ready. Solved by keeping container
+    # state in plugin.py.
+    @vcr.use_cassette
+    @use_cassette
+    async def select_version():
+        return await main.select_version_connect_fetch()
+
+    path = path.with_suffix(".json")
+    assert not path.exists()
+    await select_version()
+    assert path.exists()

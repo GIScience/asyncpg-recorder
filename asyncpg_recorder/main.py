@@ -13,7 +13,7 @@ import asyncpg
 from testcontainers.postgres import PostgresContainer
 
 # will be instantiated on pytest session start (see plugin.py)
-POSTGRES: PostgresContainer | None = None
+DSN: str = ""
 
 
 # TODO: Fix C901
@@ -31,14 +31,7 @@ def use_cassette(func: Callable):  # noqa: C901
             # Connect to a temporary Postgres database and return recorded response.
             @wraps(connect_original)
             async def connect_wrapper(*args, **kwargs):
-                assert POSTGRES is not None  # noqa: S101
-                dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
-                    user=POSTGRES.username,
-                    password=POSTGRES.password,
-                    port=POSTGRES.get_exposed_port(5432),
-                    database=POSTGRES.dbname,
-                )
-                return await connect_original(dsn=dsn)
+                return await connect_original(dsn=DSN)
 
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):

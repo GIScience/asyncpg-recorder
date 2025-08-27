@@ -33,6 +33,10 @@ def test_select_now_replay():
 uv run pytest
 ```
 
+## Limitation
+
+This plugin depends on using [testcontainers](testcontainers-python.readthedocs.io/) to boot up a temporary Postgres instance which it will connect to. This slows test suite down.
+
 ## Inbox
 
 See [inbox.md](/inbox.md)
