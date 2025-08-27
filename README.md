@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-uv add git+https://github.com:GIScience/asyncpg-recorder.git
+uv add git+https://github.com/GIScience/asyncpg-recorder.git
 ```
 
 ## Usage
