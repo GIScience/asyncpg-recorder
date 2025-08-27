@@ -27,6 +27,7 @@ dev = [
     "pytest-sugar>=1.1.1",
     "ruff>=0.12.10",
     "testcontainers[postgres]>=4.9.1",
+    "vcrpy>=7.0.0",
 ]
 
 [tool.pytest.ini_options]
