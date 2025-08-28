@@ -32,7 +32,7 @@ wheels = [
 
 [[package]]
 name = "asyncpg-recorder"
-version = "0.1.0"
+version = "2025.8.28"
 source = { editable = "." }
 dependencies = [
     { name = "asyncpg" },

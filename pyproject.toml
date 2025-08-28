@@ -1,6 +1,6 @@
 [project]
 name = "asyncpg-recorder"
-version = "0.1.0"
+version = "2025.8.28"
 description = "Automatically mock your Postgres interactions to simplify and speed up testing"
 readme = "README.md"
 license = "LGPL-3.0-only"
