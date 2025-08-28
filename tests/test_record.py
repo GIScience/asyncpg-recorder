@@ -48,7 +48,8 @@ async def test_select_version_fetchrow(path):
         result["server_version"]
         == cassette["342758293"]["results"][0]["server_version"]
     )
-    # assert isinstance(cassette["result"], Record)
+    assert result[0] == cassette["342758293"]["results"][0]["server_version"]
+    assert isinstance(result, Record)
 
 
 @pytest.mark.usefixtures("postgres")
@@ -69,7 +70,8 @@ async def test_select_version_fetch(path):
         result[0]["server_version"]
         == cassette["820789923"]["results"][0]["server_version"]
     )
-    # assert isinstance(cassette["result"][0], Record)
+    assert result[0][0] == cassette["820789923"]["results"][0]["server_version"]
+    assert isinstance(result[0], Record)
 
 
 @pytest.mark.usefixtures("postgres")
@@ -80,8 +82,11 @@ async def test_select_now_pickle(path):
 
     path = path.with_suffix(".pickle")
     assert not path.exists()
-    await select_now()
+    result = await select_now()
     assert path.exists()
+    assert isinstance(result[0], Record)
+    assert isinstance(result[0]["now"], datetime.datetime)
+    assert isinstance(result[0][0], datetime.datetime)
 
 
 @pytest.mark.usefixtures("postgres")

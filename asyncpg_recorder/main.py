@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import zlib
+from collections import OrderedDict
 from functools import wraps
 from inspect import signature
 from json import JSONDecodeError
@@ -10,6 +11,7 @@ from pathlib import Path
 from typing import Callable
 
 import asyncpg
+from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
 
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
@@ -27,8 +29,9 @@ class HashError(KeyError):
 def use_cassette(func: Callable):  # noqa: C901
     """Replay or record database response."""
 
+    # TODO: Fix C901
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs) -> list[Record]:  # noqa: C901
         connect_original = asyncpg.connect
         execute_original = asyncpg.connection.Connection._execute
 
@@ -56,10 +59,17 @@ def use_cassette(func: Callable):  # noqa: C901
                         # raise custom error to avoid catching any other error
                         raise CassetteNotFoundError from e
                 try:
-                    return cassette[hash]["results"]
+                    raw = cassette[hash]["results"]
                 except KeyError as e:
                     # raise custom error to avoid catching any other error
                     raise HashError from e
+                records = []
+                for r in raw:
+                    mapping = []
+                    for i, k in enumerate(r.keys()):
+                        mapping.append((k, i))
+                    records.append(Record(OrderedDict(mapping), tuple(r.values())))
+                return records
 
             logging.info("Try to replay from cassette.")
 

@@ -14,7 +14,6 @@ dependencies = [
 [project.entry-points.pytest11]
 asyncpg_recorder = "asyncpg_recorder.plugin"
 
-
 [build-system]
 requires = ["uv_build>=0.7.5"]
 build-backend = "uv_build"

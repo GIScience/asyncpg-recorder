@@ -6,9 +6,13 @@ from tests import main
 
 pytest_plugins = ["pytester"]
 
+@pytest.fixture(scope="module")
+def monkeypatch_module():
+    with pytest.MonkeyPatch.context() as mp:
+        yield mp
 
-@pytest.fixture()
-def postgres(monkeypatch):
+@pytest.fixture(scope="module")
+def postgres(monkeypatch_module):
     """Spin up a Postgres container for testing.
 
     Connection string will be different for each test session.
@@ -20,7 +24,7 @@ def postgres(monkeypatch):
             port=postgres.get_exposed_port(5432),  # 5432 is default port of postgres
             database=postgres.dbname,
         )
-        monkeypatch.setattr(main, "DSN", dsn)
+        monkeypatch_module.setattr(main, "DSN", dsn)
         yield
 
 
