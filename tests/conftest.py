@@ -6,10 +6,12 @@ from tests import main
 
 pytest_plugins = ["pytester"]
 
+
 @pytest.fixture(scope="module")
 def monkeypatch_module():
     with pytest.MonkeyPatch.context() as mp:
         yield mp
+
 
 @pytest.fixture(scope="module")
 def postgres(monkeypatch_module):

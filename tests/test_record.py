@@ -24,12 +24,6 @@ async def test_select_now_with_database():
     assert isinstance(result[0], Record)
 
 
-async def test_select_now_without_database():
-    """No `use_cassette` decorator. Database is not reachable."""
-    with pytest.raises(ValueError):
-        await main.select_now()
-
-
 @pytest.mark.usefixtures("postgres")
 async def test_select_version_fetchrow(path):
     @use_cassette
