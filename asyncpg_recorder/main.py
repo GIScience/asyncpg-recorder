@@ -15,6 +15,14 @@ import asyncpg
 DSN: str = ""
 
 
+class CassetteNotFoundError(FileNotFoundError):
+    pass
+
+
+class HashError(KeyError):
+    pass
+
+
 # TODO: Fix C901
 def use_cassette(func: Callable):  # noqa: C901
     """Replay or record database response."""
@@ -41,9 +49,17 @@ def use_cassette(func: Callable):  # noqa: C901
                     with open(path.with_suffix(".json"), "r") as file:
                         cassette = json.load(file)
                 except (FileNotFoundError, JSONDecodeError):
-                    with open(path.with_suffix(".pickle"), "rb") as file:
-                        cassette = pickle.load(file)  # noqa: S301
-                return cassette[hash]["results"]
+                    try:
+                        with open(path.with_suffix(".pickle"), "rb") as file:
+                            cassette = pickle.load(file)  # noqa: S301
+                    except FileNotFoundError as e:
+                        # raise custom error to avoid catching any other error
+                        raise CassetteNotFoundError from e
+                try:
+                    return cassette[hash]["results"]
+                except KeyError as e:
+                    # raise custom error to avoid catching any other error
+                    raise HashError from e
 
             logging.info("Try to replay from cassette.")
 
@@ -52,7 +68,7 @@ def use_cassette(func: Callable):  # noqa: C901
 
             return await func(*args, **kwargs)
 
-        except (KeyError, FileNotFoundError):
+        except (HashError, CassetteNotFoundError):
             # Record
             # -----
             # Record input arguments and database response.
