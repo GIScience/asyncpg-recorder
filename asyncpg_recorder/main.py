@@ -46,6 +46,18 @@ def use_cassette(func: Callable):  # noqa: C901
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
                 path = name()
+                if path.exists() and os.stat(path.with_suffix(".json")).st_size == 0:
+                    logging.info(
+                        "Cassette is empty. Removing cassette. Cassette path:\n"
+                        + str(path.with_suffix(".json"))
+                    )
+                    path.unlink()
+                if path.exists() and os.stat(path.with_suffix(".pickle")).st_size == 0:
+                    logging.info(
+                        "Cassette is empty. Removing cassette. Cassette path:\n"
+                        + str(path.with_suffix(".pickle"))
+                    )
+                    path.unlink()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash = str(zlib.crc32(pickle.dumps(args)))
                 try:
@@ -59,12 +71,12 @@ def use_cassette(func: Callable):  # noqa: C901
                         # raise custom error to avoid catching any other error
                         raise CassetteNotFoundError from e
                 try:
-                    raw = cassette[hash]["results"]
+                    raw = cassette[hash]
                 except KeyError as e:
                     # raise custom error to avoid catching any other error
                     raise HashError from e
                 records = []
-                for r in raw:
+                for r in raw["results"]:
                     mapping = []
                     for i, k in enumerate(r.keys()):
                         mapping.append((k, i))
