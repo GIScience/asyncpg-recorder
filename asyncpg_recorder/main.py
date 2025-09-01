@@ -17,7 +17,11 @@ from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
 DSN: str = ""
 
 
-class CassetteReadingError(FileNotFoundError, EOFError):
+class CassetteDecodeError(IOError):
+    pass
+
+
+class CassetteNotFoundError(FileNotFoundError):
     pass
 
 
@@ -46,34 +50,29 @@ def use_cassette(func: Callable):  # noqa: C901
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
                 path = name()
-                if path.exists() and os.stat(path.with_suffix(".json")).st_size == 0:
-                    logging.info(
-                        "Cassette is empty. Removing cassette. Cassette path:\n"
-                        + str(path.with_suffix(".json"))
-                    )
-                    path.unlink()
-                if path.exists() and os.stat(path.with_suffix(".pickle")).st_size == 0:
-                    logging.info(
-                        "Cassette is empty. Removing cassette. Cassette path:\n"
-                        + str(path.with_suffix(".pickle"))
-                    )
-                    path.unlink()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash = str(zlib.crc32(pickle.dumps(args)))
-                try:
-                    with open(path.with_suffix(".json"), "r") as file:
-                        cassette = json.load(file)
-                except (FileNotFoundError, JSONDecodeError):
+                path_json = path.with_suffix(".json")
+                path_pickle = path.with_suffix(".pickle")
+                if path_json.exists():
                     try:
-                        with open(path.with_suffix(".pickle"), "rb") as file:
+                        with open(path_json, "r") as file:
+                            cassette = json.load(file)
+                    except JSONDecodeError as e:
+                        path_json.unlink()
+                        raise CassetteDecodeError() from e
+                elif path_pickle.exists():
+                    try:
+                        with open(path_pickle, "rb") as file:
                             cassette = pickle.load(file)  # noqa: S301
-                    except (FileNotFoundError, EOFError) as e:
-                        # raise custom error to avoid catching any other error
-                        raise CassetteReadingError from e
+                    except EOFError as e:
+                        path_pickle.unlink()
+                        raise CassetteDecodeError() from e
+                else:
+                    raise CassetteNotFoundError()  # noqa: TRY301
                 try:
                     raw = cassette[hash]
                 except KeyError as e:
-                    # raise custom error to avoid catching any other error
                     raise HashError from e
                 records = []
                 for r in raw["results"]:
@@ -90,7 +89,7 @@ def use_cassette(func: Callable):  # noqa: C901
 
             return await func(*args, **kwargs)
 
-        except (HashError, CassetteReadingError):
+        except (HashError, CassetteNotFoundError, CassetteDecodeError):
             # Record
             # -----
             # Record input arguments and database response.
