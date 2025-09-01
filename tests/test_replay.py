@@ -57,3 +57,9 @@ async def test_multiple_calls_with_same_cassette():
 
     await query_1()
     await query_2()
+
+
+# TODO:
+async def test_empty_cassette_present():
+    pass
+

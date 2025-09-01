@@ -17,7 +17,7 @@ from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
 DSN: str = ""
 
 
-class CassetteNotFoundError(FileNotFoundError):
+class CassetteReadingError(FileNotFoundError, EOFError):
     pass
 
 
@@ -67,9 +67,9 @@ def use_cassette(func: Callable):  # noqa: C901
                     try:
                         with open(path.with_suffix(".pickle"), "rb") as file:
                             cassette = pickle.load(file)  # noqa: S301
-                    except FileNotFoundError as e:
+                    except (FileNotFoundError, EOFError) as e:
                         # raise custom error to avoid catching any other error
-                        raise CassetteNotFoundError from e
+                        raise CassetteReadingError from e
                 try:
                     raw = cassette[hash]
                 except KeyError as e:
@@ -90,7 +90,7 @@ def use_cassette(func: Callable):  # noqa: C901
 
             return await func(*args, **kwargs)
 
-        except (HashError, CassetteNotFoundError):
+        except (HashError, CassetteReadingError):
             # Record
             # -----
             # Record input arguments and database response.
