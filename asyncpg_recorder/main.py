@@ -119,7 +119,7 @@ def use_cassette(func: Callable):  # noqa: C901
                         # "results": pickle.dumps(result),
                         # https://github.com/MagicStack/asyncpg/pull/1000
                         **args_to_kwargs(execute_original, execute_args),
-                        **kwargs,
+                        **execute_kwargs,
                     },
                     **cassette,
                 }

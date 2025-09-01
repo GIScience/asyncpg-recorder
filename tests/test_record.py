@@ -154,7 +154,7 @@ async def test_parametrized_fixtures(path):
     async def select_version():
         return await main.select_version_connect_fetch()
 
-    path = path.with_suffix(".pickle")
+    path = path.with_suffix(".json")
     assert not path.exists()
     await select_version()
     assert path.exists()
@@ -172,7 +172,7 @@ class TestParametrizedFixtureUseCassetteOnTest:
         async def select_version():
             return await main.select_version_connect_fetch()
 
-        path = path.with_suffix(".pickle")
+        path = path.with_suffix(".json")
         assert not path.exists()
         await select_version()
         assert path.exists()
@@ -191,7 +191,7 @@ class TestParametrizedFixtureUseCassetteOnFixture:
         async def select_version():
             return await main.select_version_connect_fetch()
 
-        path = path.with_suffix(".pickle")
+        path = path.with_suffix(".json")
         assert not path.exists()
         await select_version()
         assert path.exists()
@@ -210,7 +210,7 @@ class TestParametrizedFixtureUseCassetteOnTestLoopScopeDefault:
         async def select_version():
             return await main.select_version_connect_fetch()
 
-        path = path.with_suffix(".pickle")
+        path = path.with_suffix(".json")
         assert not path.exists()
         await select_version()
         assert path.exists()
