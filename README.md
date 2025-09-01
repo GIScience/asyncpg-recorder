@@ -61,6 +61,12 @@ async def test_parametrized_fixtures(path):
 uv run pytest
 ```
 
+### Release
+
+This project uses [CalVer](https://calver.org/).
+Format is: `YYYY.0M.DD`.
+In case of releasing twice on one day add a modifier: `YYYY.0M.DD.modifier`.
+
 
 ## Limitation
 
