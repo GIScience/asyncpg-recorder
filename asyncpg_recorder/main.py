@@ -15,6 +15,7 @@ from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
 
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
+ROOT_DIR: str = ""
 
 
 class CassetteDecodeError(IOError):
@@ -170,7 +171,7 @@ def name() -> Path:
         params = f"[{node_id[start:end]}]"
     else:
         params = ""
-    file_path = Path(
+    file_path = Path(ROOT_DIR) / Path(
         node_id.replace(" (call)", "")
         .replace(" (setup)", "")
         .replace(" (teardown)", "")
@@ -178,4 +179,4 @@ def name() -> Path:
         .replace(f"{params}", "")
         + ".cassette.raw"  # .raw will be replaced by .with_suffix during file access
     )
-    return file_path.resolve()
+    return file_path

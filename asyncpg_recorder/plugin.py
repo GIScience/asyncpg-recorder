@@ -7,6 +7,10 @@ from asyncpg_recorder import main
 POSTGRES: PostgresContainer
 
 
+def pytest_configure(config):
+    main.ROOT_DIR = config.rootpath
+
+
 def pytest_sessionstart(session):
     logging.info("Start Postgres testcontainer for the entire pytest session.")
 
