@@ -61,6 +61,7 @@ def use_cassette(func: Callable):  # noqa: C901
                     try:
                         with open(path_json, "r") as file:
                             cassette = json.load(file)
+                            logger.info(f"Found json cassette at {str(path_json)}.")
                     except JSONDecodeError as e:
                         path_json.unlink()
                         raise CassetteDecodeError() from e
@@ -68,10 +69,12 @@ def use_cassette(func: Callable):  # noqa: C901
                     try:
                         with open(path_pickle, "rb") as file:
                             cassette = pickle.load(file)  # noqa: S301
+                            logger.info(f"Found pickle cassette at {str(path_pickle)}.")
                     except EOFError as e:
                         path_pickle.unlink()
                         raise CassetteDecodeError() from e
                 else:
+                    logger.error(f"Could not find cassette with path {str(path)}")
                     raise CassetteNotFoundError()  # noqa: TRY301
                 try:
                     raw = cassette[hash]
