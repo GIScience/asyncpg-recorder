@@ -13,6 +13,8 @@ from typing import Callable
 import asyncpg
 from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
 
+logger = logging.getLogger(__name__)
+
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
 ROOT_DIR: str = ""
@@ -83,7 +85,7 @@ def use_cassette(func: Callable):  # noqa: C901
                     records.append(Record(OrderedDict(mapping), tuple(r.values())))
                 return records
 
-            logging.info("Try to replay from cassette.")
+            logger.info("Try to replay from cassette.")
 
             asyncpg.connect = connect_wrapper
             asyncpg.connection.Connection._execute = execute_wrapper
@@ -135,7 +137,7 @@ def use_cassette(func: Callable):  # noqa: C901
                         pickle.dump(cassette, file)
                 return result
 
-            logging.info("Record to cassette.")
+            logger.info("Record to cassette.")
 
             asyncpg.connect = connect_original  # reset
             asyncpg.connection.Connection._execute = execute_wrapper
