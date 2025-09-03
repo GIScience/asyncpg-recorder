@@ -8,6 +8,7 @@ authors = [{email="ohsome@heigit.org"}]
 requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.30.0",
+    "py-pglite[asyncpg]>=0.4.1",
     "testcontainers>=4.9.1",
 ]
 

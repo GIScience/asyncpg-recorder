@@ -1,10 +1,10 @@
 import logging
 
-from testcontainers.postgres import PostgresContainer
+from py_pglite import PGliteManager
 
 from asyncpg_recorder import main
 
-POSTGRES: PostgresContainer
+MANAGER: PGliteManager
 
 
 def pytest_configure(config):
@@ -14,19 +14,15 @@ def pytest_configure(config):
 def pytest_sessionstart(session):
     logging.info("Start Postgres testcontainer for the entire pytest session.")
 
-    global POSTGRES
-    POSTGRES = PostgresContainer("postgres").start()
-    dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
-        user=POSTGRES.username,
-        password=POSTGRES.password,
-        port=POSTGRES.get_exposed_port(5432),
-        database=POSTGRES.dbname,
-    )
-    main.DSN = dsn
+    global MANAGER
+    MANAGER = PGliteManager()
+    MANAGER.start()
+    dsn = MANAGER.get_connection_string()
+    main.DSN = dsn.replace("+psycopg", "")
 
 
 def pytest_sessionfinish(session, exitstatus):
     logging.info("Stop Postgres testcontainer.")
 
-    global POSTGRES
-    POSTGRES.stop()
+    global MANAGER
+    MANAGER.start()
