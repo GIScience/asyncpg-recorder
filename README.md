@@ -52,6 +52,13 @@ async def test_parametrized_fixtures(path):
     await select_version()
 ```
 
+If you want to save the cassettes in a specific directory, set the variable cassettes-dir in your pyproject.toml.
+The path should be relative to pyproject.toml.
+
+```toml
+[tool.asyncpg-recorder]
+"cassettes-dir"="tests/cassettes"
+```
 
 ## Development
 
