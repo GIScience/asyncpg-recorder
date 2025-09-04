@@ -1,14 +1,22 @@
 import logging
+from pathlib import Path
 
 from testcontainers.postgres import PostgresContainer
 
 from asyncpg_recorder import main
+from asyncpg_recorder.config import _read_config
 
 POSTGRES: PostgresContainer
 
 
 def pytest_configure(config):
     main.ROOT_DIR = config.rootpath
+    CONFIG = _read_config()
+    cassettes_dir = CONFIG.get("cassettes-dir", None)
+    if cassettes_dir is not None:
+        main.CASSETTES_DIR = cassettes_dir
+        cassettes_dir_path = Path(main.ROOT_DIR) / Path(main.CASSETTES_DIR)
+        cassettes_dir_path.mkdir(parents=True, exist_ok=True)
 
 
 def pytest_sessionstart(session):

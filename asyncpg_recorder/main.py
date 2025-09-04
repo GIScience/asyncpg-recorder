@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
 ROOT_DIR: str = ""
+CASSETTES_DIR: str = ""
 
 
 class CassetteDecodeError(IOError):
@@ -176,7 +177,7 @@ def name() -> Path:
         params = f"[{node_id[start:end]}]"
     else:
         params = ""
-    file_path = Path(ROOT_DIR) / Path(
+    file_path = Path(
         node_id.replace(" (call)", "")
         .replace(" (setup)", "")
         .replace(" (teardown)", "")
@@ -184,4 +185,17 @@ def name() -> Path:
         .replace(f"{params}", "")
         + ".cassette.raw"  # .raw will be replaced by .with_suffix during file access
     )
+    if CASSETTES_DIR:
+        file_path = Path(file_path)
+        # find common parents between approved dir and file path, both
+        # relative to pytest root, and remove them
+        for i, part in enumerate(Path(CASSETTES_DIR).parts):
+            if part == file_path.parts[i]:
+                continue
+            else:
+                break
+        else:
+            i = 0
+        file_path = str(Path(*file_path.parts[i:]))
+    file_path = Path(ROOT_DIR) / Path(CASSETTES_DIR) / Path(file_path)
     return file_path
