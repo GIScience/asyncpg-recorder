@@ -15,7 +15,9 @@ from tests import main
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
 
-@pytest.mark.asyncio
+pytestmark = pytest.mark.asyncio
+
+
 @use_cassette
 async def test_select_version_fetch():
     results = await main.select_version_connect_fetch()
@@ -24,7 +26,6 @@ async def test_select_version_fetch():
     assert results[0][0] == "15.13 (Debian 15.13-1.pgdg120+1)"
 
 
-@pytest.mark.asyncio
 @use_cassette
 async def test_select_version_fetchrow():
     results = await main.select_version_connect_fetchrow()
@@ -33,7 +34,6 @@ async def test_select_version_fetchrow():
     assert results[0] == "15.13 (Debian 15.13-1.pgdg120+1)"
 
 
-@pytest.mark.asyncio
 @use_cassette
 async def test_select_now():
     results = await main.select_now()
@@ -46,7 +46,6 @@ async def test_select_now():
     )
 
 
-@pytest.mark.asyncio
 @use_cassette
 async def test_multiple_calls_with_same_cassette():
     async def query_1():
@@ -62,4 +61,3 @@ async def test_multiple_calls_with_same_cassette():
 # TODO:
 async def test_empty_cassette_present():
     pass
-

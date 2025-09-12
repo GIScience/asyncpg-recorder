@@ -10,20 +10,21 @@ POSTGRES: PostgresContainer
 
 
 def pytest_configure(config):
+    cassettes_dir = _read_config().get("cassettes-dir", "")
+    if cassettes_dir:
+        Path(
+            Path(config.rootpath) / Path(cassettes_dir),
+        ).mkdir(parents=True, exist_ok=True)
+
     main.ROOT_DIR = config.rootpath
-    CONFIG = _read_config()
-    cassettes_dir = CONFIG.get("cassettes-dir", None)
-    if cassettes_dir is not None:
-        main.CASSETTES_DIR = cassettes_dir
-        cassettes_dir_path = Path(main.ROOT_DIR) / Path(main.CASSETTES_DIR)
-        cassettes_dir_path.mkdir(parents=True, exist_ok=True)
+    main.CASSETTES_DIR = cassettes_dir
 
 
 def pytest_sessionstart(session):
     logging.info("Start Postgres testcontainer for the entire pytest session.")
 
     global POSTGRES
-    POSTGRES = PostgresContainer("postgres").start()
+    POSTGRES = PostgresContainer("postgres").start()  # type: ignore
     dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
         user=POSTGRES.username,
         password=POSTGRES.password,

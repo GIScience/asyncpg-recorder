@@ -147,7 +147,6 @@ async def param(request):
     return request.param
 
 
-@pytest.mark.asyncio
 @pytest.mark.usefixtures("postgres", "param")
 @use_cassette
 async def test_parametrized_fixtures(path):
@@ -198,7 +197,6 @@ class TestParametrizedFixtureUseCassetteOnFixture:
 
 
 @pytest.mark.skip("Not supported.")
-@pytest.mark.asyncio
 class TestParametrizedFixtureUseCassetteOnTestLoopScopeDefault:
     @pytest_asyncio.fixture(params=[False, True])
     async def param(self, request):
