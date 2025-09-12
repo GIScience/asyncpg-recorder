@@ -6,6 +6,8 @@ from testcontainers.postgres import PostgresContainer
 from asyncpg_recorder import main
 from asyncpg_recorder.config import _read_config
 
+logger = logging.getLogger(__name__)
+
 POSTGRES: PostgresContainer
 
 
@@ -21,7 +23,7 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session):
-    logging.info("Start Postgres testcontainer for the entire pytest session.")
+    logger.info("Start Postgres testcontainer for the entire pytest session.")
 
     global POSTGRES
     POSTGRES = PostgresContainer("postgres").start()  # type: ignore
@@ -35,7 +37,7 @@ def pytest_sessionstart(session):
 
 
 def pytest_sessionfinish(session, exitstatus):
-    logging.info("Stop Postgres testcontainer.")
+    logger.info("Stop Postgres testcontainer.")
 
     global POSTGRES
     POSTGRES.stop()

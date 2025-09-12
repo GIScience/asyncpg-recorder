@@ -2,7 +2,6 @@ import pytest
 
 from tests import main
 
-
 pytestmark = pytest.mark.asyncio
 
 
