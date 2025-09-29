@@ -35,7 +35,8 @@ pipeline {
                     }
                 }
                 script {
-                    sh 'uv sync --locked --no-editable'
+                    // must be editable for pytest coverage
+                    sh 'uv sync --locked --editable'
                 }
             }
             post {
