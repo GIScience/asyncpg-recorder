@@ -1,5 +1,10 @@
 # Asyncpg Recorder
 
+[![Build Status](https://jenkins.heigit.org/buildStatus/icon?job=asyncpg-recorder/main)](https://jenkins.heigit.org/job/asyncpg-recorder/job/main/)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=asyncpg-recorder&metric=alert_status)](https://sonarcloud.io/dashboard?id=asyncpg-recorder)
+[![LICENSE](https://img.shields.io/github/license/GIScience/asyncpg-recorder)](COPYING)
+[![status: active](https://github.com/GIScience/badges/raw/master/status/active.svg)](https://github.com/GIScience/badges#active)
+
 ## Installation
 
 ```bash

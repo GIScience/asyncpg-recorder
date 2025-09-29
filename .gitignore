@@ -9,4 +9,11 @@ wheels/
 # Virtual environments
 .venv
 
+# IDE
+.idea/
+
+# test reports
+.coverage
+coverage.xml
+
 .python-version
