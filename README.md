@@ -9,7 +9,7 @@
 ## Installation
 
 ```bash
-uv add git+https://github.com/GIScience/asyncpg-recorder.git
+uv add asyncpg-recorder
 ```
 
 ## Usage
@@ -85,12 +85,6 @@ To make a new release run `./scripts/release.sh <version number>`.
 ## Limitation
 
 - Works only with pytest
-- Depends on [testcontainers](testcontainers-python.readthedocs.io/) 
+- Depends on [testcontainers](https://testcontainers-python.readthedocs.io/)
   - Testcontainers is used to boot up a temporary Postgres instance to which asyncpg will be connected.
   - This slows test suite down.
-
-
-## Inbox
-
-See [inbox.md](/inbox.md)
-
