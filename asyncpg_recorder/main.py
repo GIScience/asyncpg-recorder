@@ -55,7 +55,7 @@ def use_cassette(func: Callable):  # noqa: C901
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
                 path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
-                hash = str(zlib.crc32(pickle.dumps(args)))
+                hash_ = str(zlib.crc32(pickle.dumps(args)))
                 path_json = path.with_suffix(".json")
                 path_pickle = path.with_suffix(".pickle")
                 if path_json.exists():
@@ -78,7 +78,7 @@ def use_cassette(func: Callable):  # noqa: C901
                     logger.error(f"Found no cassette at {path!s}.json|.pickle")
                     raise CassetteNotFoundError()  # noqa: TRY301
                 try:
-                    raw = cassette[hash]
+                    raw = cassette[hash_]
                 except KeyError as e:
                     raise HashError from e
                 records = []
@@ -91,8 +91,8 @@ def use_cassette(func: Callable):  # noqa: C901
 
             logger.info("Try to replay from cassette.")
 
-            asyncpg.connect = connect_wrapper
-            asyncpg.connection.Connection._execute = execute_wrapper
+            asyncpg.connect = connect_wrapper  # ty: ignore
+            asyncpg.connection.Connection._execute = execute_wrapper  # ty: ignore
 
             return await func(*args, **kwargs)
 
@@ -104,7 +104,7 @@ def use_cassette(func: Callable):  # noqa: C901
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
                 path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
-                hash = str(zlib.crc32(pickle.dumps(args)))
+                hash_ = str(zlib.crc32(pickle.dumps(args)))
                 result = await execute_original(
                     self,
                     *execute_args,
@@ -120,7 +120,7 @@ def use_cassette(func: Callable):  # noqa: C901
                 except FileNotFoundError:
                     cassette = {}
                 cassette = {
-                    hash: {
+                    hash_: {
                         "results": [dict(r) for r in result],
                         # TODO:
                         # "results": pickle.dumps(result),
