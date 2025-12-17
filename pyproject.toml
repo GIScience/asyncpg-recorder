@@ -25,12 +25,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://ohsome.org/"
-# TODO: update once dedicated documentation is available
 Documentation = "https://github.com/GIScience/asyncpg-recorder/blob/main/README.md"
 Repository = "https://github.com/GIScience/asyncpg-recorder"
 Issues = "https://github.com/GIScience/asyncpg-recorder/issues"
-# TODO: create changelog
-# Changelog = "https://github.com/GIScience/asyncpg-recorder/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/GIScience/asyncpg-recorder/blob/main/CHANGELOG.md"
 
 [project.entry-points.pytest11]
 asyncpg_recorder = "asyncpg_recorder.plugin"
