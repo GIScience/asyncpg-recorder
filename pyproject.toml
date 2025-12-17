@@ -1,6 +1,6 @@
 [project]
 name = "asyncpg-recorder"
-version = "0.1.0"
+version = "0.2.0"
 authors = [{name="HeiGIT ohsome team", email="ohsome@heigit.org"}]
 description = "Automatically mock your Postgres interactions to simplify and speed up testing"
 readme = "README.md"
