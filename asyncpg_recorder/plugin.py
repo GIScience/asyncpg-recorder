@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from pathlib import Path
 
@@ -14,14 +15,9 @@ POSTGRES_STARTED: bool = False
 
 
 def pytest_configure(config):
-    cassettes_dir = _read_config().get("cassettes-dir", "")
-    if cassettes_dir:
-        Path(
-            Path(config.rootpath) / Path(cassettes_dir),
-        ).mkdir(parents=True, exist_ok=True)
-
-    main.ROOT_DIR = config.rootpath
-    main.CASSETTES_DIR = cassettes_dir
+    with contextlib.suppress(KeyError):
+        main.CASSETTES_DIR = Path(_read_config()["cassettes-dir"])
+    main.ROOT_DIR = Path(config.rootpath)
 
 
 def pytest_collection_modifyitems(session, config, items):

@@ -1,6 +1,6 @@
 """Set of functions for testing.
 
-The differ in how connection is established to the Postgres database and which
+They differ in how connection is established to the Postgres database and which
 SQL execution function is called.
 """
 

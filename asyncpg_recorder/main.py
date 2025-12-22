@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 # will be instantiated on pytest session start (see plugin.py)
 DSN: str = ""
-ROOT_DIR: str = ""
-CASSETTES_DIR: str = ""
+ROOT_DIR: Path
+CASSETTES_DIR: Path | None = None
 
 
 class CassetteDecodeError(IOError):
@@ -171,6 +171,8 @@ def args_to_kwargs(func, args):
 def name() -> Path:
     # TODO: support base dir (then rewrite tests to use tmp_dir)
     # TODO: Try out with xdist
+    global ROOT_DIR
+    global CASSETTES_DIR
     node_id = os.environ["PYTEST_CURRENT_TEST"]
     if "[" in node_id and "]" in node_id:
         start = node_id.index("[") + 1
@@ -178,25 +180,29 @@ def name() -> Path:
         params = f"[{node_id[start:end]}]"
     else:
         params = ""
-    file_path = Path(
-        node_id.replace(" (call)", "")
-        .replace(" (setup)", "")
-        .replace(" (teardown)", "")
-        .replace("::", "--")
-        .replace(f"{params}", "")
-        + ".cassette.raw"  # .raw will be replaced by .with_suffix during file access
+    file_path = (
+        Path(
+            node_id.replace(" (call)", "")
+            .replace(" (setup)", "")
+            .replace(" (teardown)", "")
+            .replace("::", "--")
+            .replace(f"{params}", "")
+            # .raw will be replaced by .with_suffix during file access
+            + ".cassette.raw"
+        )
+        .resolve()
+        .relative_to(ROOT_DIR)
     )
-    if CASSETTES_DIR:
-        file_path = Path(file_path)
-        # find common parents between approved dir and file path, both
-        # relative to pytest root, and remove them
-        for i, part in enumerate(Path(CASSETTES_DIR).parts):
+    if CASSETTES_DIR is not None:
+        for i, part in enumerate(CASSETTES_DIR.parts):
             if part == file_path.parts[i]:
                 continue
             else:
                 break
         else:
             i = 0
-        file_path = str(Path(*file_path.parts[i:]))
-    file_path = Path(ROOT_DIR) / Path(CASSETTES_DIR) / Path(file_path)
+        file_path = ROOT_DIR / CASSETTES_DIR / Path(*file_path.parts[i:])
+    else:
+        file_path = ROOT_DIR / file_path
+    file_path.mkdir(parents=True, exist_ok=True)
     return file_path
