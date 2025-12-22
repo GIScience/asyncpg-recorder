@@ -1,6 +1,6 @@
 [project]
 name = "asyncpg-recorder"
-version = "0.2.0"
+version = "0.3.0"
 authors = [{name="HeiGIT ohsome team", email="ohsome@heigit.org"}]
 description = "Automatically mock your Postgres interactions to simplify and speed up testing"
 readme = "README.md"
@@ -54,6 +54,7 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+addopts = "-s"
 
 [tool.ruff.lint]
 select = [
