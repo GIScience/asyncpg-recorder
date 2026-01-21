@@ -9,6 +9,7 @@ import urllib.request
 
 import pytest
 import vcr
+from vcr.record_mode import RecordMode
 
 from asyncpg_recorder import use_cassette
 from tests import main
@@ -17,7 +18,10 @@ pytestmark = pytest.mark.asyncio
 
 
 @use_cassette
-@vcr.use_cassette(path="tests/test_vcr_alongside_asyncpg_recorder.vcr")
+@vcr.use_cassette(
+    path="tests/test_vcr_alongside_asyncpg_recorder.vcr",
+    record_mode=RecordMode.NONE,
+)
 async def test_vcr_alongside_asyncpg_recorder():
     async def select_version():
         return await main.select_version_connect_fetch()
@@ -32,7 +36,10 @@ async def test_vcr_alongside_asyncpg_recorder():
 
 
 # Make sure order of wrapper does not matter
-@vcr.use_cassette(path="tests/test_vcr_alongside_asyncpg_recorder.vcr")
+@vcr.use_cassette(
+    path="tests/test_vcr_alongside_asyncpg_recorder.vcr",
+    record_mode=RecordMode.NONE,
+)
 @use_cassette
 async def test_vcr_alongside_asyncpg_recorder_2():
     async def select_version():
