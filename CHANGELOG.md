@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Current Main
+
+* build/tests: add pytest-randomly to run tests in random order (fe71b0f)
+
 ## Release 0.3.0
 
 - fix: create sub-directories in cassette directory during nameing of cassette file (f73ec93)
