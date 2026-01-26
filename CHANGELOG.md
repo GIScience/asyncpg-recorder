@@ -3,6 +3,7 @@
 ## Current Main
 
 * build/tests: add pytest-randomly to run tests in random order (fe71b0f)
+* build: migrate pre-commit hooks to prek (82c44f9)
 
 ## Release 0.3.0
 
