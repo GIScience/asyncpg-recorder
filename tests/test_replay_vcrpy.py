@@ -6,6 +6,7 @@ state in plugin.py.
 """
 
 import urllib.request
+from pathlib import Path
 
 import pytest
 import vcr
@@ -19,7 +20,7 @@ pytestmark = pytest.mark.asyncio
 
 @use_cassette
 @vcr.use_cassette(
-    path="tests/test_vcr_alongside_asyncpg_recorder.vcr",
+    path=str(Path(__file__).parent / "test_vcr_alongside_asyncpg_recorder.vcr"),
     record_mode=RecordMode.NONE,
 )
 async def test_vcr_alongside_asyncpg_recorder():
@@ -37,7 +38,7 @@ async def test_vcr_alongside_asyncpg_recorder():
 
 # Make sure order of wrapper does not matter
 @vcr.use_cassette(
-    path="tests/test_vcr_alongside_asyncpg_recorder.vcr",
+    path=str(Path(__file__).parent / "test_vcr_alongside_asyncpg_recorder.vcr"),
     record_mode=RecordMode.NONE,
 )
 @use_cassette

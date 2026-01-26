@@ -76,8 +76,9 @@ def use_cassette(func: Callable):  # noqa: C901
                         path_pickle.unlink()
                         raise CassetteDecodeError() from e
                 else:
-                    logger.error(f"Found no cassette at {path!s}.json|.pickle")
-                    raise CassetteNotFoundError()  # noqa: TRY301
+                    msg = f"Found no cassette at {path!s}.json|.pickle"
+                    logger.error(msg)
+                    raise CassetteNotFoundError(msg)  # noqa: TRY301
                 try:
                     raw = cassette[hash_]
                 except KeyError as e:
@@ -176,22 +177,18 @@ def name() -> Path:
     node_id = os.environ["PYTEST_CURRENT_TEST"]
     if "[" in node_id and "]" in node_id:
         start = node_id.index("[") + 1
-        end = node_id.index("]")
+        end = node_id.rindex("]")
         params = f"[{node_id[start:end]}]"
     else:
         params = ""
-    file_path = (
-        Path(
-            node_id.replace(" (call)", "")
-            .replace(" (setup)", "")
-            .replace(" (teardown)", "")
-            .replace("::", "--")
-            .replace(f"{params}", "")
-            # .raw will be replaced by .with_suffix during file access
-            + ".cassette.raw"
-        )
-        .resolve()
-        .relative_to(ROOT_DIR)
+    file_path = Path(
+        node_id.replace(" (call)", "")
+        .replace(" (setup)", "")
+        .replace(" (teardown)", "")
+        .replace("::", "--")
+        .replace(f"{params}", "")
+        # .raw will be replaced by .with_suffix during file access
+        + ".cassette.raw"
     )
     if CASSETTES_DIR is not None:
         for i, part in enumerate(CASSETTES_DIR.parts):
@@ -204,5 +201,6 @@ def name() -> Path:
         file_path = ROOT_DIR / CASSETTES_DIR / Path(*file_path.parts[i:])
     else:
         file_path = ROOT_DIR / file_path
+    file_path = file_path.resolve()
     file_path.mkdir(parents=True, exist_ok=True)
     return file_path
