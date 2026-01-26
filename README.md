@@ -68,10 +68,8 @@ The path should be relative to pyproject.toml.
 
 ## Development
 
-### Tests
-
 ```bash
-uv run pre-commit install
+uv run prek install  # pre-commit
 uv run pytest
 ```
 
