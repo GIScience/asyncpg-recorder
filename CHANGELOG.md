@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.4.0
 
 * build/tests: add pytest-randomly to run tests in random order (fe71b0f)
 * build: migrate pre-commit hooks to prek (82c44f9)
