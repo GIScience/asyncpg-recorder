@@ -25,8 +25,8 @@ async def test_select_now_with_database():
 
 
 @pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_select_version_fetchrow(path):
-    @use_cassette
     async def select_version():
         return await main.select_version_connect_fetchrow()
 
@@ -37,18 +37,17 @@ async def test_select_version_fetchrow(path):
 
     with open(path) as file:
         cassette = json.load(file)
-
     assert (
         result["server_version"]
-        == cassette["342758293"]["results"][0]["server_version"]
+        == cassette["1603757252"]["results"][0]["server_version"]
     )
-    assert result[0] == cassette["342758293"]["results"][0]["server_version"]
+    assert result[0] == cassette["1603757252"]["results"][0]["server_version"]
     assert isinstance(result, Record)
 
 
 @pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_select_version_fetch(path):
-    @use_cassette
     async def select_version():
         return await main.select_version_connect_fetch()
 
@@ -59,18 +58,17 @@ async def test_select_version_fetch(path):
 
     with open(path) as file:
         cassette = json.load(file)
-
     assert (
         result[0]["server_version"]
-        == cassette["820789923"]["results"][0]["server_version"]
+        == cassette["2064987634"]["results"][0]["server_version"]
     )
-    assert result[0][0] == cassette["820789923"]["results"][0]["server_version"]
+    assert result[0][0] == cassette["2064987634"]["results"][0]["server_version"]
     assert isinstance(result[0], Record)
 
 
 @pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_select_now_pickle(path):
-    @use_cassette
     async def select_now():
         return await main.select_now()
 
@@ -84,12 +82,11 @@ async def test_select_now_pickle(path):
 
 
 @pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_multiple_calls_with_same_cassette(path: Path):
-    @use_cassette
     async def query_1():
         return await main.select_version_connect_fetch()
 
-    @use_cassette
     async def query_2():
         return await main.select_version_connect_fetchrow()
 
@@ -109,8 +106,8 @@ async def test_multiple_calls_with_same_cassette(path: Path):
 
 @pytest.mark.parametrize("param", ["foo", "bar"])
 @pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_parametrized_with_same_cassette(param: str, path: Path):
-    @use_cassette
     async def query(param: str):
         return await main.select_version_connect_fetch()
 
@@ -127,12 +124,12 @@ async def test_parametrized_with_same_cassette(param: str, path: Path):
 
 
 @pytest.mark.usefixtures("postgres")
+@vcr.use_cassette
+@use_cassette
 async def test_select_version_fetch_with_vcr_cassette(path):
     # Using vcr.py cassette along side asyncpg_recorder cassette resulted in
     # indefinitely waiting for testcontainer to be ready. Solved by keeping container
     # state in plugin.py.
-    @vcr.use_cassette
-    @use_cassette
     async def select_version():
         return await main.select_version_connect_fetch()
 
