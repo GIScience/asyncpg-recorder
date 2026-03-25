@@ -36,7 +36,7 @@ class HashError(KeyError):
 # TODO: Fix C901
 def use_cassette(func: Callable):  # noqa: C901
     """Replay or record database response."""
-    func.asyncpg_recorder = True
+    func.asyncpg_recorder: bool = True
 
     # TODO: Fix C901
     @wraps(func)
