@@ -66,6 +66,13 @@ The path should be relative to pyproject.toml.
 "cassettes-dir"="tests/cassettes"
 ```
 
+### Caveats
+
+The same database request on Python >= 3.14 yields a different hash for
+cassette entry than on Python <= 3.13. If it is important to run tests
+against both Python version ranges you need to record twice.
+
+
 ## Development
 
 ```bash

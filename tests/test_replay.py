@@ -4,6 +4,7 @@ Cassettes have been recorded by adding the `postgres` fixture to the tests for o
 """
 
 import datetime
+import sys
 from pathlib import Path
 
 import pytest
@@ -38,12 +39,18 @@ async def test_select_version_fetchrow():
 async def test_select_now():
     results = await main.select_now()
     assert isinstance(results[0], Record)
-    assert results[0]["now"] == datetime.datetime(
-        2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
-    )
-    assert results[0][0] == datetime.datetime(
-        2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
-    )
+
+    # different cassette entries are used for different Python versions
+    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
+        expected = datetime.datetime(
+            2026, 3, 26, 6, 31, 6, 833132, tzinfo=datetime.timezone.utc
+        )
+    else:
+        expected = datetime.datetime(
+            2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
+        )
+    assert results[0]["now"] == expected
+    assert results[0][0] == expected
 
 
 @use_cassette

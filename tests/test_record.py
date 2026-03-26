@@ -1,5 +1,6 @@
 import datetime
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -35,13 +36,15 @@ async def test_select_version_fetchrow(path):
     result = await select_version()
     assert path.exists()
 
+    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
+        hash_ = "342758293"
+    else:
+        hash_ = "1603757252"
+
     with open(path) as file:
         cassette = json.load(file)
-    assert (
-        result["server_version"]
-        == cassette["1603757252"]["results"][0]["server_version"]
-    )
-    assert result[0] == cassette["1603757252"]["results"][0]["server_version"]
+    assert result["server_version"] == cassette[hash_]["results"][0]["server_version"]
+    assert result[0] == cassette[hash_]["results"][0]["server_version"]
     assert isinstance(result, Record)
 
 
@@ -56,13 +59,17 @@ async def test_select_version_fetch(path):
     result = await select_version()
     assert path.exists()
 
+    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
+        hash_ = "820789923"
+    else:
+        hash_ = "2064987634"
+
     with open(path) as file:
         cassette = json.load(file)
     assert (
-        result[0]["server_version"]
-        == cassette["2064987634"]["results"][0]["server_version"]
+        result[0]["server_version"] == cassette[hash_]["results"][0]["server_version"]
     )
-    assert result[0][0] == cassette["2064987634"]["results"][0]["server_version"]
+    assert result[0][0] == cassette[hash_]["results"][0]["server_version"]
     assert isinstance(result[0], Record)
 
 
