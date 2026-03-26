@@ -16,6 +16,7 @@ async def test_cassette_dir_not_set(monkeypatch):
     )
     assert result.is_absolute()
     assert result == expected
+    assert not result.exists()
 
 
 async def test_cassette_dir_set(monkeypatch):
@@ -30,7 +31,8 @@ async def test_cassette_dir_set(monkeypatch):
         / "test_name.py--test_cassette_dir_set.cassette.raw"
     )
     assert result == expected
-    assert result.exists()
+    assert not result.exists()
+    assert result.parent.exists()
 
 
 async def test_cassette_dir_set_nested(monkeypatch):
@@ -45,4 +47,5 @@ async def test_cassette_dir_set_nested(monkeypatch):
         / "test_name.py--test_cassette_dir_set_nested.cassette.raw"
     )
     assert result == expected
-    assert result.exists()
+    assert not result.exists()
+    assert result.parent.exists()

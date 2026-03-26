@@ -202,5 +202,5 @@ def name() -> Path:
     else:
         file_path = ROOT_DIR / file_path
     file_path = file_path.resolve()
-    file_path.mkdir(parents=True, exist_ok=True)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
     return file_path
