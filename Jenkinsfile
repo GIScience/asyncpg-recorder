@@ -54,7 +54,6 @@ pipeline {
             steps {
                 script {
                     // run pytest
-                    sh 'rm -r /jenkins/workspace/asyncpg-recorder_main/tests/cassettes/name/'
                     sh 'uv run --python 3.11 pytest tests'
                     sh 'uv run --python 3.14 pytest --cov=asyncpg_recorder --cov-report=xml tests'
                     // run static analysis with sonar-scanner
