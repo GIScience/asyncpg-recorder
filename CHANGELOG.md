@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.6.0
 
 * fix(name): create parent directories but not filename as directory (547908e)
     * This avoids creation of empty directories with names ending in `.raw`
