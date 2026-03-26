@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Current Main
+
+* tests/docs: handle different hashes due to different Python version (af1db0f)
+    * The same database request on Python >= 3.14 yields a different hash for cassette entry than on Python <= 3.13. If it is important to run tests against both Python version ranges you need to record twice.
+
 ## Release 0.6.0
 
 * fix(name): create parent directories but not filename as directory (547908e)
