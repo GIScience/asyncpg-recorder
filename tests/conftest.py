@@ -19,7 +19,7 @@ def postgres(monkeypatch_module):
 
     Connection string will be different for each test session.
     """
-    with PostgresContainer("postgres:15") as postgres:
+    with PostgresContainer("postgres:18.3") as postgres:
         dsn = "postgres://{user}:{password}@127.0.0.1:{port}/{database}".format(
             user=postgres.username,
             password=postgres.password,

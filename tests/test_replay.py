@@ -22,16 +22,16 @@ pytestmark = pytest.mark.asyncio
 async def test_select_version_fetch():
     results = await main.select_version_connect_fetch()
     assert isinstance(results[0], Record)
-    assert results[0]["server_version"] == "15.13 (Debian 15.13-1.pgdg120+1)"
-    assert results[0][0] == "15.13 (Debian 15.13-1.pgdg120+1)"
+    assert results[0]["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert results[0][0] == "18.3 (Debian 18.3-1.pgdg13+1)"
 
 
 @use_cassette
 async def test_select_version_fetchrow():
     results = await main.select_version_connect_fetchrow()
     assert isinstance(results, Record)
-    assert results["server_version"] == "15.13 (Debian 15.13-1.pgdg120+1)"
-    assert results[0] == "15.13 (Debian 15.13-1.pgdg120+1)"
+    assert results["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert results[0] == "18.3 (Debian 18.3-1.pgdg13+1)"
 
 
 @use_cassette
@@ -39,10 +39,10 @@ async def test_select_now():
     results = await main.select_now()
     assert isinstance(results[0], Record)
     assert results[0]["now"] == datetime.datetime(
-        2025, 8, 25, 11, 46, 5, 247390, tzinfo=datetime.timezone.utc
+        2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
     )
     assert results[0][0] == datetime.datetime(
-        2025, 8, 25, 11, 46, 5, 247390, tzinfo=datetime.timezone.utc
+        2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
     )
 
 

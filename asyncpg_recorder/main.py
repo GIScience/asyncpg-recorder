@@ -146,7 +146,7 @@ def use_cassette(func: Callable):  # noqa: C901
             logger.info("Record to cassette.")
 
             asyncpg.connect = connect_original  # reset
-            asyncpg.connection.Connection._execute = execute_wrapper
+            asyncpg.connection.Connection._execute = execute_wrapper  # type: ignore
             return await func(*args, **kwargs)
 
         finally:

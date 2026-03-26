@@ -31,8 +31,8 @@ async def test_vcr_alongside_asyncpg_recorder():
         return urllib.request.urlopen("http://www.iana.org/domains/reserved").read()
 
     db_results = await select_version()
-    assert db_results[0]["server_version"] == "15.13 (Debian 15.13-1.pgdg120+1)"
-    assert db_results[0][0] == "15.13 (Debian 15.13-1.pgdg120+1)"
+    assert db_results[0]["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert db_results[0][0] == "18.3 (Debian 18.3-1.pgdg13+1)"
     get_domains()
 
 
@@ -50,6 +50,6 @@ async def test_vcr_alongside_asyncpg_recorder_2():
         return urllib.request.urlopen("http://www.iana.org/domains/reserved").read()
 
     db_results = await select_version()
-    assert db_results[0]["server_version"] == "15.13 (Debian 15.13-1.pgdg120+1)"
-    assert db_results[0][0] == "15.13 (Debian 15.13-1.pgdg120+1)"
+    assert db_results[0]["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert db_results[0][0] == "18.3 (Debian 18.3-1.pgdg13+1)"
     get_domains()
