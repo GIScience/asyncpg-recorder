@@ -2,6 +2,11 @@
 
 ## Current Main
 
+* fix(name): create parent directories but not filename as directory (547908e)
+    * This avoids creation of empty directories with names ending in `.raw`
+
+## Release 0.5.0
+
 ### Breaking Changes
 
 * support Python 3.11 and bump asyncpg version to greater equals 0.31 (5598199)
