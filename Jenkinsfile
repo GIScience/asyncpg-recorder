@@ -17,7 +17,7 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Install project') {
             steps {
                 script {
                     echo REPO_NAME
@@ -46,6 +46,24 @@ pipeline {
             }
         }
 
+        stage('Static analysis') {
+            environment {
+                VIRTUAL_ENV="${WORKSPACE}/.venv"
+                PATH="${VIRTUAL_ENV}/bin:${PATH}"
+            }
+            steps {
+                script {
+                    sh 'ruff format --check --diff .'
+                    sh 'ruff check .'
+                }
+            }
+            post {
+                failure {
+                  rocket_testfail()
+                }
+            }
+        }
+
         stage('Test') {
             environment {
                 VIRTUAL_ENV="${WORKSPACE}/.venv"
@@ -54,8 +72,8 @@ pipeline {
             steps {
                 script {
                     // run pytest
+                    sh 'pytest --cov=asyncpg_recorder --cov-report=xml tests'
                     sh 'uv run --python 3.11 pytest tests'
-                    sh 'uv run --python 3.14 pytest --cov=asyncpg_recorder --cov-report=xml tests'
                     // run static analysis with sonar-scanner
                     def scannerHome = tool 'SonarScanner 4'
                     withSonarQubeEnv('sonarcloud GIScience/ohsome') {
@@ -73,9 +91,6 @@ pipeline {
                         }
                         sh "${scannerHome}/bin/sonar-scanner " + SONAR_CLI_PARAMETER
                     }
-                    // run other static code analysis
-                    sh 'ruff format --check --diff .'
-                    sh 'ruff check .'
                 }
             }
             post {
