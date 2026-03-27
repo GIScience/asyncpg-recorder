@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Current Main
+
+- fix: request postgres only for pytest items which are functions (4fc691d)
+
 ## Release 0.7.0
 
 * tests/docs: handle different hashes due to different Python version (af1db0f)
