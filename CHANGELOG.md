@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.8.0
 
 - fix: request postgres only for pytest items which are functions (4fc691d)
 
