@@ -18,7 +18,7 @@
 
 ### Breaking Changes
 
-* support Python 3.11 and bump asyncpg version to greater equals 0.31 (5598199)
+* support Python 3.14 and bump asyncpg version to greater equals 0.31 (5598199)
     * Please re-create all cassettes. Cassette entry hashes changed after asyncpg version bump.
 
 ## Release 0.4.0
