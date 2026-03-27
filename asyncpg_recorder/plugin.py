@@ -22,7 +22,8 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(session, config, items):
     global POSTGRES_NEEDED
-    POSTGRES_NEEDED = any(hasattr(item.function, "asyncpg_recorder") for item in items)
+    functions = filter(lambda i: hasattr(i, "function"), items)
+    POSTGRES_NEEDED = any(hasattr(f.function, "asyncpg_recorder") for f in functions)
 
 
 def pytest_runtestloop(session):
