@@ -1,5 +1,5 @@
-from pytest_nodeid_to_filepath import get_filepath
 import pytest
+from pytest_nodeid_to_filepath import get_filepath
 from testcontainers.postgres import PostgresContainer
 
 from tests import main
