@@ -1,10 +1,9 @@
 import json
 import logging
-import os
 import pickle
 import zlib
 from collections import OrderedDict
-from functools import wraps
+from functools import partial, wraps
 from inspect import signature
 from json import JSONDecodeError
 from pathlib import Path
@@ -12,6 +11,7 @@ from typing import Callable
 
 import asyncpg
 from asyncpg.protocol.protocol import _create_record as Record  # noqa: N812
+from pytest_nodeid_to_filepath import get_filepath
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,11 @@ def use_cassette(func: Callable):  # noqa: C901
     async def wrapper(*args, **kwargs) -> list[Record]:  # noqa: C901
         connect_original = asyncpg.connect
         execute_original = asyncpg.connection.Connection._execute
+        global CASSETTES_DIR
+        if CASSETTES_DIR is not None:
+            get_filepath_ = partial(get_filepath, directory=CASSETTES_DIR, count=False)
+        else:
+            get_filepath_ = partial(get_filepath, count=False)
 
         try:
             # Replay
@@ -54,11 +59,10 @@ def use_cassette(func: Callable):  # noqa: C901
 
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
-                path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash_ = str(zlib.crc32(pickle.dumps(args)))
-                path_json = path.with_suffix(".json")
-                path_pickle = path.with_suffix(".pickle")
+                path_json = get_filepath_(extension=".cassette.json")
+                path_pickle = get_filepath_(extension=".cassette.pickle")
                 if path_json.exists():
                     try:
                         with open(path_json, "r") as file:
@@ -76,6 +80,7 @@ def use_cassette(func: Callable):  # noqa: C901
                         path_pickle.unlink()
                         raise CassetteDecodeError() from e
                 else:
+                    path = get_filepath_(extension=".cassette")
                     msg = f"Found no cassette at {path!s}.json|.pickle"
                     logger.error(msg)
                     raise CassetteNotFoundError(msg)  # noqa: TRY301
@@ -104,9 +109,10 @@ def use_cassette(func: Callable):  # noqa: C901
             # Record input arguments and database response.
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
-                path = name()
                 args = {"args": execute_args, "kwargs": execute_kwargs}
                 hash_ = str(zlib.crc32(pickle.dumps(args)))
+                path_json = get_filepath_(extension=".cassette.json")
+                path_pickle = get_filepath_(extension=".cassette.pickle")
                 result = await execute_original(
                     self,
                     *execute_args,
@@ -114,10 +120,10 @@ def use_cassette(func: Callable):  # noqa: C901
                 )
                 try:
                     try:
-                        with open(path.with_suffix(".json"), "r") as file:
+                        with open(path_json, "r") as file:
                             cassette = json.load(file)
                     except (FileNotFoundError, JSONDecodeError):
-                        with open(path.with_suffix(".pickle"), "rb") as file:
+                        with open(path_pickle, "rb") as file:
                             cassette = pickle.load(file)  # noqa: S301
                 except FileNotFoundError:
                     cassette = {}
@@ -133,13 +139,13 @@ def use_cassette(func: Callable):  # noqa: C901
                     **cassette,
                 }
                 try:
-                    with open(path.with_suffix(".json"), "w") as file:
+                    with open(path_json, "w") as file:
                         json.dump(cassette, file)
                 except TypeError:
                     # remove partly written JSON file
-                    if path.with_suffix(".json").exists():
-                        path.with_suffix(".json").unlink()
-                    with open(path.with_suffix(".pickle"), "wb") as file:
+                    if path_json.exists():
+                        path_json.unlink()
+                    with open(path_pickle, "wb") as file:
                         pickle.dump(cassette, file)
                 return result
 
@@ -167,40 +173,3 @@ def args_to_kwargs(func, args):
             strict=False,
         )
     )
-
-
-def name() -> Path:
-    # TODO: support base dir (then rewrite tests to use tmp_dir)
-    # TODO: Try out with xdist
-    global ROOT_DIR
-    global CASSETTES_DIR
-    node_id = os.environ["PYTEST_CURRENT_TEST"]
-    if "[" in node_id and "]" in node_id:
-        start = node_id.index("[") + 1
-        end = node_id.rindex("]")
-        params = f"[{node_id[start:end]}]"
-    else:
-        params = ""
-    file_path = Path(
-        node_id.replace(" (call)", "")
-        .replace(" (setup)", "")
-        .replace(" (teardown)", "")
-        .replace("::", "--")
-        .replace(f"{params}", "")
-        # .raw will be replaced by .with_suffix during file access
-        + ".cassette.raw"
-    )
-    if CASSETTES_DIR is not None:
-        for i, part in enumerate(CASSETTES_DIR.parts):
-            if part == file_path.parts[i]:
-                continue
-            else:
-                break
-        else:
-            i = 0
-        file_path = ROOT_DIR / CASSETTES_DIR / Path(*file_path.parts[i:])
-    else:
-        file_path = ROOT_DIR / file_path
-    file_path = file_path.resolve()
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    return file_path

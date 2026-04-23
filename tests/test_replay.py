@@ -17,6 +17,8 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
 
 pytestmark = pytest.mark.asyncio
+# Uncomment for recreation of cassettes
+# pytestmark = [pytest.mark.asyncio, pytest.mark.usefixtures("postgres")]
 
 
 @use_cassette
@@ -43,11 +45,11 @@ async def test_select_now():
     # different cassette entries are used for different Python versions
     if sys.version_info[0] == 3 and sys.version_info[1] < 14:
         expected = datetime.datetime(
-            2026, 3, 26, 6, 31, 6, 833132, tzinfo=datetime.timezone.utc
+            2026, 4, 23, 8, 59, 45, 693492, tzinfo=datetime.timezone.utc
         )
     else:
         expected = datetime.datetime(
-            2026, 3, 26, 5, 42, 45, 76056, tzinfo=datetime.timezone.utc
+            2026, 4, 23, 8, 59, 45, 693492, tzinfo=datetime.timezone.utc
         )
     assert results[0]["now"] == expected
     assert results[0][0] == expected

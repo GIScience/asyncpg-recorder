@@ -16,6 +16,8 @@ from asyncpg_recorder import use_cassette
 from tests import main
 
 pytestmark = pytest.mark.asyncio
+# Uncomment for recreation of cassettes
+# pytestmark = [pytest.mark.asyncio, pytest.mark.usefixtures("postgres")]
 
 
 @use_cassette

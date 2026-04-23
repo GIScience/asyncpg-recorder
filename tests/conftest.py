@@ -1,7 +1,7 @@
+from pytest_nodeid_to_filepath import get_filepath
 import pytest
 from testcontainers.postgres import PostgresContainer
 
-from asyncpg_recorder.main import name
 from tests import main
 
 pytest_plugins = ["pytester"]
@@ -31,10 +31,14 @@ def postgres(monkeypatch_module):
 
 
 @pytest.fixture
-def path():
-    p = name()
+def path_json():
+    p = get_filepath(extension=".cassette.json", directory="tests/cassettes")
     yield p
-    try:
-        p.with_suffix(".json").unlink()
-    except FileNotFoundError:
-        p.with_suffix(".pickle").unlink()
+    p.unlink()
+
+
+@pytest.fixture
+def path_pickle():
+    p = get_filepath(extension=".cassette.pickle", directory="tests/cassettes")
+    yield p
+    p.unlink()
