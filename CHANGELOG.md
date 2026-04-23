@@ -2,6 +2,8 @@
 
 ## Main
 
+- refactor!: use pytest-nodeid-to-filepath to generate cassette paths (d10cda5)
+    - cassette paths for parametrized tests might change
 - tests: add test to cover usage of asyncpg query logger (0dc97ff)
 - build: make pytest a main dependency and bump to version 9.x (cde711)
 - build: bump uv_build version to < 0.12.0 (c626ed2)
