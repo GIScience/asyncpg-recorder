@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Main
+
+- tests: add test to cover usage of asyncpg query logger (0dc97ff)
+- build: make pytest a main dependency and bump to version 9.x (cde711)
+- build: bump uv_build version to < 0.12.0 (c626ed2)
+
 ## Release 0.8.0
 
 - fix: request postgres only for pytest items which are functions (4fc691d)
