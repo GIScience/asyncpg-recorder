@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Main
+## Release 0.9.0
 
 - refactor!: use pytest-nodeid-to-filepath to generate cassette paths (d10cda5)
     - cassette paths for parametrized tests might change
