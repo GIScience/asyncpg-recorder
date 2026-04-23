@@ -50,6 +50,29 @@ async def test_select_version_fetchrow(path):
 
 @pytest.mark.usefixtures("postgres")
 @use_cassette
+async def test_select_version_fetchrow_with_query_logger(path):
+    async def select_version():
+        return await main.select_version_connect_fetchrow_with_query_logger()
+
+    path = path.with_suffix(".json")
+    assert not path.exists()
+    result = await select_version()
+    assert path.exists()
+
+    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
+        hash_ = "342758293"
+    else:
+        hash_ = "1603757252"
+
+    with open(path) as file:
+        cassette = json.load(file)
+    assert result["server_version"] == cassette[hash_]["results"][0]["server_version"]
+    assert result[0] == cassette[hash_]["results"][0]["server_version"]
+    assert isinstance(result, Record)
+
+
+@pytest.mark.usefixtures("postgres")
+@use_cassette
 async def test_select_version_fetch(path):
     async def select_version():
         return await main.select_version_connect_fetch()
@@ -215,4 +238,22 @@ class TestParametrizedFixtureUseCassetteOnTestLoopScopeDefault:
         path = path.with_suffix(".json")
         assert not path.exists()
         await select_version()
+        assert path.exists()
+
+
+@pytest.mark.asyncio(loop_scope="class")
+class TestParametrizedFixtureUseCassetteOnTestButQueryDbInFixture:
+    @pytest_asyncio.fixture(params=[False, True], loop_scope="class")
+    @use_cassette
+    async def param(self, request):
+        async def select_version():
+            return await main.select_version_connect_fetch()
+
+        await select_version()
+        return request.param
+
+    @pytest.mark.usefixtures("postgres", "param")
+    @use_cassette
+    async def test(self, path):
+        path = path.with_suffix(".json")
         assert path.exists()
