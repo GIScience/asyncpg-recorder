@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Current main
+
+- feat: support for recording queries via asyncpg connection pools (e42e500)
+
 ## Release 0.9.0
 
 - refactor!: use pytest-nodeid-to-filepath to generate cassette paths (d10cda5)
