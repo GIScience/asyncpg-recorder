@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current main
+## Release 0.10.0
 
 - feat: support for recording queries via asyncpg connection pools (e42e500)
 
