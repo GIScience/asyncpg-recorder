@@ -25,72 +25,62 @@ async def test_select_now_with_database():
     assert isinstance(result[0], Record)
 
 
+@pytest.mark.parametrize(
+    "fetch,hash_py313,hash_py314",
+    [
+        (
+            main.select_version_connect_fetchrow,
+            "342758293",
+            "1603757252",
+        ),
+        (
+            main.select_version_connect_fetchrow_with_query_logger,
+            "342758293",
+            "1603757252",
+        ),
+        (
+            main.select_version_connect_fetch,
+            "820789923",  # hash is different because fetchrow limits to 1
+            "2064987634",
+        ),
+        (
+            main.select_version_pool_fetchrow,
+            "342758293",
+            "1603757252",
+        ),
+        (
+            main.select_version_pool_fetch,
+            "820789923",
+            "2064987634",
+        ),
+    ],
+)
 @pytest.mark.usefixtures("postgres")
 @use_cassette
-async def test_select_version_fetchrow(path_json):
+async def test_select_version_fetchrow(path_json, fetch, hash_py313, hash_py314):
     async def select_version():
-        return await main.select_version_connect_fetchrow()
+        return await fetch()
 
     assert not path_json.exists()
+
     result = await select_version()
+
     assert path_json.exists()
 
     if sys.version_info[0] == 3 and sys.version_info[1] < 14:
-        hash_ = "342758293"
+        hash_ = hash_py313
     else:
-        hash_ = "1603757252"
+        hash_ = hash_py314
 
     with open(path_json) as file:
         cassette = json.load(file)
+
+    if isinstance(result, list):
+        result = result[0]
+
     assert result["server_version"] == cassette[hash_]["results"][0]["server_version"]
     assert result[0] == cassette[hash_]["results"][0]["server_version"]
     assert isinstance(result, Record)
-
-
-@pytest.mark.usefixtures("postgres")
-@use_cassette
-async def test_select_version_fetchrow_with_query_logger(path_json):
-    async def select_version():
-        return await main.select_version_connect_fetchrow_with_query_logger()
-
-    assert not path_json.exists()
-    result = await select_version()
-    assert path_json.exists()
-
-    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
-        hash_ = "342758293"
-    else:
-        hash_ = "1603757252"
-
-    with open(path_json) as file:
-        cassette = json.load(file)
-    assert result["server_version"] == cassette[hash_]["results"][0]["server_version"]
-    assert result[0] == cassette[hash_]["results"][0]["server_version"]
-    assert isinstance(result, Record)
-
-
-@pytest.mark.usefixtures("postgres")
-@use_cassette
-async def test_select_version_fetch(path_json):
-    async def select_version():
-        return await main.select_version_connect_fetch()
-
-    assert not path_json.exists()
-    result = await select_version()
-    assert path_json.exists()
-
-    if sys.version_info[0] == 3 and sys.version_info[1] < 14:
-        hash_ = "820789923"
-    else:
-        hash_ = "2064987634"
-
-    with open(path_json) as file:
-        cassette = json.load(file)
-    assert (
-        result[0]["server_version"] == cassette[hash_]["results"][0]["server_version"]
-    )
-    assert result[0][0] == cassette[hash_]["results"][0]["server_version"]
-    assert isinstance(result[0], Record)
 
 
 @pytest.mark.usefixtures("postgres")

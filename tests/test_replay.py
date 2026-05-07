@@ -38,6 +38,22 @@ async def test_select_version_fetchrow():
 
 
 @use_cassette
+async def test_select_version_fetchrow_via_pool():
+    results = await main.select_version_pool_fetchrow()
+    assert isinstance(results, Record)
+    assert results["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert results[0] == "18.3 (Debian 18.3-1.pgdg13+1)"
+
+
+@use_cassette
+async def test_select_version_fetch_via_pool():
+    results = await main.select_version_pool_fetch()
+    assert isinstance(results[0], Record)
+    assert results[0]["server_version"] == "18.3 (Debian 18.3-1.pgdg13+1)"
+    assert results[0][0] == "18.3 (Debian 18.3-1.pgdg13+1)"
+
+
+@use_cassette
 async def test_select_now():
     results = await main.select_now()
     assert isinstance(results[0], Record)
@@ -49,7 +65,7 @@ async def test_select_now():
         )
     else:
         expected = datetime.datetime(
-            2026, 4, 23, 8, 59, 45, 693492, tzinfo=datetime.timezone.utc
+            2026, 5, 7, 12, 36, 40, 718907, tzinfo=datetime.timezone.utc
         )
     assert results[0]["now"] == expected
     assert results[0][0] == expected

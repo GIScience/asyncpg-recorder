@@ -42,6 +42,7 @@ def use_cassette(func: Callable):  # noqa: C901
     @wraps(func)
     async def wrapper(*args, **kwargs) -> list[Record]:  # noqa: C901
         connect_original = asyncpg.connect
+        create_pool_original = asyncpg.create_pool
         execute_original = asyncpg.connection.Connection._execute
         global CASSETTES_DIR
         if CASSETTES_DIR is not None:
@@ -56,6 +57,10 @@ def use_cassette(func: Callable):  # noqa: C901
             @wraps(connect_original)
             async def connect_wrapper(*args, **kwargs):
                 return await connect_original(dsn=DSN)
+
+            @wraps(create_pool_original)
+            def create_pool_wrapper(*args, **kwargs):
+                return create_pool_original(dsn=DSN)
 
             @wraps(execute_original)
             async def execute_wrapper(self, *execute_args, **execute_kwargs):
@@ -99,6 +104,7 @@ def use_cassette(func: Callable):  # noqa: C901
             logger.info("Try to replay from cassette.")
 
             asyncpg.connect = connect_wrapper  # ty: ignore
+            asyncpg.create_pool = create_pool_wrapper  # ty: ignore
             asyncpg.connection.Connection._execute = execute_wrapper  # ty: ignore
 
             return await func(*args, **kwargs)
@@ -152,6 +158,7 @@ def use_cassette(func: Callable):  # noqa: C901
             logger.info("Record to cassette.")
 
             asyncpg.connect = connect_original  # reset
+            asyncpg.create_pool = create_pool_original  # reset
             asyncpg.connection.Connection._execute = execute_wrapper  # type: ignore
             return await func(*args, **kwargs)
 
@@ -160,6 +167,7 @@ def use_cassette(func: Callable):  # noqa: C901
             # -----
             # Reset mocked asyncpg function to original.
             asyncpg.connect = connect_original
+            asyncpg.create_pool = create_pool_original
             asyncpg.connection.Connection._execute = execute_original
 
     return wrapper

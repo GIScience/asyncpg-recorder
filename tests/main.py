@@ -43,8 +43,12 @@ async def select_version_connect_fetchrow_with_query_logger() -> asyncpg.Record:
 
 
 async def select_version_pool_fetch():
-    pass
+    async with asyncpg.create_pool(DSN) as pool:  # noqa: SIM117
+        async with pool.acquire() as con:
+            return await con.fetch("SHOW server_version")
 
 
 async def select_version_pool_fetchrow():
-    pass
+    async with asyncpg.create_pool(DSN) as pool:  # noqa: SIM117
+        async with pool.acquire() as con:
+            return await con.fetchrow("SHOW server_version")
