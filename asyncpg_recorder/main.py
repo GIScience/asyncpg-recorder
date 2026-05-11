@@ -50,6 +50,8 @@ def use_cassette(func: Callable):  # noqa: C901
         else:
             get_filepath_ = partial(get_filepath, count=False)
 
+        get_filepath_().parent.mkdir(parents=True, exist_ok=True)
+
         try:
             # Replay
             # ------

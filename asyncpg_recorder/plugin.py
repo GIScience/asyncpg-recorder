@@ -20,7 +20,6 @@ def pytest_configure(config):
     with contextlib.suppress(KeyError):
         cassette_dir = Path(_read_config()["cassettes-dir"])
     if cassette_dir is not None:
-        cassette_dir.mkdir(parents=True, exist_ok=True)
         main.CASSETTES_DIR = cassette_dir
 
 
