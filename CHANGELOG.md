@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.10.2
 
 - fix: move creation of cassette directory to plugin.py (7a15dc9)
 
