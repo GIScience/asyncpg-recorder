@@ -15,9 +15,13 @@ POSTGRES_STARTED: bool = False
 
 
 def pytest_configure(config):
-    with contextlib.suppress(KeyError):
-        main.CASSETTES_DIR = Path(_read_config()["cassettes-dir"])
     main.ROOT_DIR = Path(config.rootpath)
+
+    with contextlib.suppress(KeyError):
+        cassette_dir = Path(_read_config()["cassettes-dir"])
+    if cassette_dir is not None:
+        cassette_dir.mkdir(parents=True, exist_ok=True)
+        main.CASSETTES_DIR = cassette_dir
 
 
 def pytest_collection_modifyitems(session, config, items):

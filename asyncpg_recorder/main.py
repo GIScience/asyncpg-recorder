@@ -46,7 +46,6 @@ def use_cassette(func: Callable):  # noqa: C901
         execute_original = asyncpg.connection.Connection._execute
         global CASSETTES_DIR
         if CASSETTES_DIR is not None:
-            CASSETTES_DIR.mkdir(parents=True, exist_ok=True)
             get_filepath_ = partial(get_filepath, directory=CASSETTES_DIR, count=False)
         else:
             get_filepath_ = partial(get_filepath, count=False)
