@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.10.3
 
 - fix: create full cassette path based on pytest-nodeid-to-filepath (a7f4fc0)
 
