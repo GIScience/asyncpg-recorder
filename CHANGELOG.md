@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Current Main
+
+- fix: create full cassette path based on pytest-nodeid-to-filepath (a7f4fc0)
+
 ## Release 0.10.2
 
 - fix: move creation of cassette directory to plugin.py (7a15dc9)
