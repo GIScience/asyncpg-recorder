@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Current Main
+## Release 0.10.1
 
 - fix: create cassette dir if it does not exist (373b57f)
 
