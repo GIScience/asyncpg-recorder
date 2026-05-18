@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Release 0.11.4
+
+- build: upgrade dependencies via `uv sync --upgrade` (42a1127)
+
 ## Release 0.10.3
 
 - fix: create full cassette path based on pytest-nodeid-to-filepath (a7f4fc0)
