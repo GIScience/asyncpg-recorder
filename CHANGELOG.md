@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## Release 0.11.4
+## Release 0.11.0
+
+* build: change source of `pytest-nodeid-to-filepath` to pypi (1070619)
+
+## Release 0.10.4
 
 - build: upgrade dependencies via `uv sync --upgrade` (42a1127)
 
