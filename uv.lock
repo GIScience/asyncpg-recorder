@@ -57,6 +57,7 @@ source = { editable = "." }
 dependencies = [
     { name = "asyncpg" },
     { name = "pytest" },
+    { name = "pytest-nodeid-to-filepath" },
     { name = "testcontainers" },
 ]
 
@@ -65,7 +66,6 @@ dev = [
     { name = "prek" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
-    { name = "pytest-nodeid-to-filepath" },
     { name = "pytest-randomly" },
     { name = "ruff" },
     { name = "testcontainers" },
@@ -76,6 +76,7 @@ dev = [
 requires-dist = [
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-nodeid-to-filepath", specifier = ">=0.1.0" },
     { name = "testcontainers", extras = ["postgres"], specifier = ">=4.9.1" },
 ]
 
@@ -84,7 +85,6 @@ dev = [
     { name = "prek", specifier = ">=0.3.0" },
     { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "pytest-nodeid-to-filepath", git = "https://github.com/GIScience/pytest-nodeid-to-filepath" },
     { name = "pytest-randomly", specifier = ">=4.0.1" },
     { name = "ruff", specifier = "==0.14.14" },
     { name = "testcontainers", extras = ["postgres"], specifier = ">=4.9.1" },
@@ -431,9 +431,13 @@ wheels = [
 [[package]]
 name = "pytest-nodeid-to-filepath"
 version = "0.1.0"
-source = { git = "https://github.com/GIScience/pytest-nodeid-to-filepath#445e530cc8f6ecdf6458de29b9cc67fdd89ee536" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/41/68d344a6a8eb96de86c8699a189b7eb734d69a4f63630a493c61b8956907/pytest_nodeid_to_filepath-0.1.0.tar.gz", hash = "sha256:1cf93a9f8a008e2eee05869d281bed3b4cc879651d0a245f474360d6a6c00e08", size = 18173, upload-time = "2026-06-23T11:44:48.273Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/1a/b4ae4c2fab790636c98e2e904557e44f899503d2ee070f985bf69f724fbd/pytest_nodeid_to_filepath-0.1.0-py3-none-any.whl", hash = "sha256:f3ce7f4d8b6a1deae3b88b43a0db984d69cd913759076c599868e4eb2b65dc22", size = 20082, upload-time = "2026-06-23T11:44:46.883Z" },
 ]
 
 [[package]]
